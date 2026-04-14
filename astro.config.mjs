@@ -9,8 +9,8 @@ export default defineConfig({
   site: 'https://evanwill.github.io',
 
   // If your site lives in a subdirectory (e.g. GitHub Pages project sites),
-  // set base to that path.  For example, a repo named "my-story" at
-  // https://username.github.io/my-story/ would use: base: '/my-story'
+  // set base to that path with a trailing slash.  For example, a repo named
+  // "my-story" at https://username.github.io/my-story/ would use: base: '/my-story/'
   // Leave as '/' (or remove the line) for a root / custom domain deployment.
   base: '/choose-your-own-csv/',
 });

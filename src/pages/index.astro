@@ -10,7 +10,8 @@ import Layout from '../layouts/Layout.astro';
 import { siteTitle, siteDescription, siteFooter, stories, developmentMode } from '../config.js';
 
 // Base URL used to build links that work for both root and subdirectory deploys.
-const base = import.meta.env.BASE_URL;
+// Normalized to always have a trailing slash so path concatenation works correctly.
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 ---
 <Layout title="">
   <div class="container">

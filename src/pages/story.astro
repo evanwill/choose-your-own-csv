@@ -25,7 +25,8 @@ import { siteFooter, stories, developmentMode } from '../config.js';
 const configData = JSON.stringify({ stories, developmentMode });
 
 // Pass the base URL so client-side links work in subdirectory deployments.
-const base = import.meta.env.BASE_URL;
+// Normalized to always have a trailing slash so path concatenation works correctly.
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 ---
 <Layout title="Story">
   <div class="story-container">
