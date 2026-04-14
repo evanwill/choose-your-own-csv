@@ -3,15 +3,14 @@ layout: ../layouts/ContentLayout.astro
 title: About
 ---
 
-choose-your-own-csv is an open-source template for creating interactive, nonlinear narrative stories from a simple spreadsheet.
-Each story is stored as a CSV file — no database or special software required.
-Readers navigate between scenes by choosing links, and the app tracks their position using URL query strings.
+[choose-your-own-csv](https://github.com/evanwill/choose-your-own-csv) is an open-source template for publishing interactive, nonlinear narrative stories from a simple spreadsheet.
 
 ## How It Works
 
-Stories are structured as rows in a CSV spreadsheet.
-Each row represents a single scene and can contain a title, narrative text, and a set of choices that link to other rows.
-The web app fetches the CSV at runtime, parses it in the browser, and renders the current scene — no server-side processing needed.
+Each story is written as a spreadsheet following simple conventions, with rows representing the "pages" and the interlinking choices of the narrative--something like a Choose Your Own Adventure!
+
+When a user visits the choose-your-own-csv website, it loads and parses a story CSV, generating the "story pages" to explore.
+It can load the spreadsheet from a CSV on the web (such as a published Google Sheet!), which enables live collaobration and prototyping with minimal set up.
 
 ## Technology
 

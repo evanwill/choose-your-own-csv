@@ -11,7 +11,7 @@ Once the CSV is downloaded, the javascript stores it in the browser's session st
 
 If you want a fresh reload of the data (i.e. you made changes in Sheets and want to see the results), simply open the page in a new window!
 
-### Set up Google Sheets
+## Set up Google Sheets
 
 Set up a Google Sheet with data following the template.
 Be especially careful with column names in the first row!
