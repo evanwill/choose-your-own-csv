@@ -4,6 +4,8 @@ Your choose-your-own-csv site loads and parses a CSV directly to create your int
 To create your story, prep your spreadsheet following the CSV template to build up your content.
 Then configure your web project to point at the location where you CSV is published.
 
+You can start with this [Google Sheet template](https://docs.google.com/spreadsheets/d/1cqItA21wg_y_BOwAYAqSpw5qxoR_D0-Nx1vB4rEuB7Q/copy).
+
 ## Spreadsheet Conventions
 
 To create your story you will need to follow a very specific convention in the spreadsheet.
