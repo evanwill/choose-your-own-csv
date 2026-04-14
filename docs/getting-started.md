@@ -174,7 +174,7 @@ npm run preview
    ```js
    export default defineConfig({
      site: 'https://YOUR_USERNAME.github.io',
-     base: '/YOUR_REPO_NAME',
+     base: '/YOUR_REPO_NAME/',
    });
    ```
 
