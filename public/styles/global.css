@@ -1,0 +1,280 @@
+/* =============================================================
+   global.css — site-wide styles for choose-your-own-csv
+   ============================================================= */
+
+/* ----- CSS custom properties (design tokens) ----- */
+:root {
+  --color-bg: #faf9f6;
+  --color-surface: #ffffff;
+  --color-border: #d8d5cf;
+  --color-text: #2c2a27;
+  --color-muted: #6b6860;
+  --color-accent: #5b4fcf;
+  --color-accent-hover: #3d3499;
+  --color-accent-light: #edeaff;
+
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-serif: Georgia, "Times New Roman", serif;
+
+  --radius: 0.5rem;
+  --max-width: 720px;
+  --spacing: 1.5rem;
+}
+
+/* ----- Reset & base ----- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 18px; scroll-behavior: smooth; }
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  line-height: 1.65;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+img, video { max-width: 100%; height: auto; display: block; }
+
+a { color: var(--color-accent); text-decoration: underline; }
+a:hover { color: var(--color-accent-hover); }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-serif);
+  line-height: 1.25;
+  margin-block-end: 0.5em;
+}
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.2rem; }
+
+p { margin-block-end: 1em; }
+
+ul, ol { margin-block-end: 1em; padding-inline-start: 1.5em; }
+
+code {
+  background: var(--color-accent-light);
+  border-radius: 3px;
+  font-size: 0.9em;
+  padding: 0.1em 0.35em;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin-block: var(--spacing);
+}
+
+/* ----- Layout helpers ----- */
+.container {
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding-inline: var(--spacing);
+}
+
+/* ----- Site header ----- */
+.site-header {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 0.75rem var(--spacing);
+}
+
+.site-title {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-decoration: none;
+  color: var(--color-text);
+}
+.site-title:hover { color: var(--color-accent); }
+
+/* ----- Main content area ----- */
+main {
+  flex: 1;
+  padding-block: calc(var(--spacing) * 1.5);
+}
+
+/* ----- Site footer ----- */
+.site-footer {
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  padding: 0.75rem var(--spacing);
+  text-align: center;
+}
+
+/* ----- Home page ----- */
+.home-intro {
+  margin-block-end: calc(var(--spacing) * 1.5);
+}
+
+.story-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.story-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--spacing);
+  transition: border-color 0.15s;
+}
+.story-card:hover { border-color: var(--color-accent); }
+
+.story-card a {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-decoration: none;
+  margin-block-end: 0.25rem;
+}
+.story-card a:hover { text-decoration: underline; }
+
+.story-card p {
+  color: var(--color-muted);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* ----- Dev-mode CSV form ----- */
+.dev-form {
+  background: var(--color-accent-light);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius);
+  margin-block-start: calc(var(--spacing) * 1.5);
+  padding: var(--spacing);
+}
+
+.dev-form h2 { font-size: 1.1rem; margin-block-end: 0.5rem; }
+
+.dev-form p { font-size: 0.9rem; margin-block-end: 0.75rem; }
+
+.dev-form form { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+.dev-form input[type="url"] {
+  flex: 1;
+  min-width: 200px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  padding: 0.4rem 0.6rem;
+}
+
+.btn {
+  background: var(--color-accent);
+  border: none;
+  border-radius: var(--radius);
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0.4rem 1rem;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.btn:hover, .btn:focus { background: var(--color-accent-hover); color: #fff; }
+
+/* ----- Story player ----- */
+.story-container {
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding-inline: var(--spacing);
+}
+
+/* loading / error states */
+#story-loading,
+#story-error {
+  color: var(--color-muted);
+  font-style: italic;
+  padding-block: var(--spacing);
+}
+#story-error { color: #c0392b; font-style: normal; }
+#story-error code { background: #fdecea; }
+
+/* story page card */
+#story-page {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: calc(var(--spacing) * 1.25);
+}
+
+.story-page-title {
+  font-size: 1.75rem;
+  margin-block-end: 0.75rem;
+}
+
+.story-page-text {
+  margin-block-end: var(--spacing);
+  line-height: 1.7;
+}
+
+/* Styles applied to markdown-generated content inside the text area */
+.story-page-text p   { margin-block-end: 0.85em; }
+.story-page-text p:last-child { margin-block-end: 0; }
+.story-page-text strong { font-weight: 700; }
+.story-page-text em     { font-style: italic; }
+.story-page-text a      { color: var(--color-accent); }
+.story-page-text code   { background: var(--color-accent-light); border-radius: 3px; font-size: 0.9em; padding: 0.1em 0.35em; }
+
+/* choices */
+.choices-label {
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-block-end: 0.5rem;
+}
+
+.choices-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+}
+
+.choice-link {
+  background: var(--color-accent-light);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius);
+  color: var(--color-accent);
+  cursor: pointer;
+  display: block;
+  font-size: 1rem;
+  padding: 0.6rem 1rem;
+  text-align: left;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+.choice-link:hover, .choice-link:focus {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+/* dead-end / ending message */
+.story-end {
+  color: var(--color-muted);
+  font-style: italic;
+  margin-block-start: var(--spacing);
+  font-size: 0.95rem;
+}
+
+/* back-to-top / restart link */
+.story-nav {
+  margin-block-start: var(--spacing);
+  font-size: 0.9rem;
+}
+
+/* ----- Responsive tweaks ----- */
+@media (max-width: 600px) {
+  html { font-size: 16px; }
+  .site-header, main, .site-footer { padding-inline: 1rem; }
+}

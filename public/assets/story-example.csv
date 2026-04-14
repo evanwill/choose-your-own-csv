@@ -1,0 +1,6 @@
+id,title,text,choice_1,choice_2,choice_3
+1,The Story Begins,"On this page the story begins, with some background information. But now you must make a choice!",Turn left|2,Turn right|3,Stay put|4
+2,South Hallway,"You are in a coridor that goes on forever. You start walking, but never stop. The End.",,,
+3,North Hallway,"After turning right, you hope to see something of interest. Unfortunately, your world  fades to black and you can sense nothing in any direction. The End.",,,
+4,Still Beginning,"You figure it is safer to stay put. After waiting for a long time (it must be centuries), you figure you better do something!",Turn left|2,Turn right|3,
+

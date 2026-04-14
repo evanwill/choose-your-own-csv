@@ -1,0 +1,55 @@
+---
+/**
+ * Layout.astro — base HTML wrapper used by every page on the site.
+ *
+ * Props:
+ *   title       – page title (appended to site title in <title>)
+ *   description – optional <meta> description override
+ */
+import { siteTitle, siteDescription } from '../config.js';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = siteDescription,
+} = Astro.props;
+
+// Build the full <title> string
+const pageTitle = title ? `${title} | ${siteTitle}` : siteTitle;
+
+// import.meta.env.BASE_URL resolves to the `base` value in astro.config.mjs
+// (e.g. "/my-story/").  Used so that asset paths work in subdirectory deploys.
+const base = import.meta.env.BASE_URL;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{pageTitle}</title>
+    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <!-- Global styles -->
+    <link rel="stylesheet" href={`${base}styles/global.css`} />
+  </head>
+  <body>
+    <!-- ===== Site header ===== -->
+    <header class="site-header">
+      <a href={base} class="site-title">{siteTitle}</a>
+    </header>
+
+    <!-- ===== Main content ===== -->
+    <main>
+      <slot />
+    </main>
+
+    <!-- ===== Site footer ===== -->
+    <footer class="site-footer">
+      <slot name="footer" />
+    </footer>
+  </body>
+</html>
