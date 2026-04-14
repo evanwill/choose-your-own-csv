@@ -26,7 +26,7 @@ Paste link into your configuration as value for `story-csv`.
 
 For example: 
 
-`story-csv: https://docs.google.com/spreadsheets/d/e/2PACX-1vSn7AA-cbsXT3_nNUGftc1ab-CKXOJHMQCIENeR9NHElbyI9_qA99o0-HNZdG04v-M2_N21bUe_krQQ/pub?output=csv`
+`story-csv: https://docs.google.com/spreadsheets/d/e/2PACX-1vSUe5ZvNEPQ4wRTYbewm4OMBWIX4u6CAadsTcw-HDDXBgqWnyVvXOlwPrNfex62uRGUZY23Z-WyYwdn/pub?output=csv`
 
 ### Set up Web CSV
 
@@ -34,14 +34,14 @@ If you have a CSV available anywhere on the web, you can use it by referencing t
 
 For example:
 
-`story-csv: https://www.lib.uidaho.edu/collectionbuilder/demo-metadata.csv`
+`story-csv: https://evanwill.github.io/choose-your-own-csv/assets/story-example.csv`
 
 Please ensure your CSV is correctly formatted and encoded (UTF-8), being especially careful with the column names.
 We suggest creating your CSV using OpenRefine, Sheets, or LibreOffice Calc (and do not suggest using Excel, since Excel's CSV output is not correctly formatted).
 
 To use a CSV hosted in a GitHub repository, use the "raw" link.
 
-`story-csv: https://raw.githubusercontent.com/CollectionBuilder/collectionbuilder-sample-data/main/psychiana_cbdemo_gh.csv`
+`story-csv: https://raw.githubusercontent.com/evanwill/choose-your-own-csv/refs/heads/main/public/assets/story-example.csv`
 
 *Note:* depending on where your CSV is hosted, you may encounter [CORS errors](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS/Errors).
 
@@ -52,7 +52,7 @@ Copy your CSV file into the "assets" folder then reference it in the config usin
 
 For example:
 
-`story-csv: /assets/demo-metadata.csv`
+`story-csv: /assets/story-example.csv`
 
 ## Share via URL
 
@@ -63,11 +63,11 @@ Add your full CSV link to the end of the choose-your-own-csv instance's URL as t
 
 For example:
 
-`https://evanwill.github.io/choose-your-own-csv/?csv=https://raw.githubusercontent.com/CollectionBuilder/collectionbuilder-sample-data/main/psychiana_cbdemo_gh.csv`
+`https://evanwill.github.io/choose-your-own-csv/?csv=https://raw.githubusercontent.com/evanwill/choose-your-own-csv/refs/heads/main/public/assets/story-example.csv`
 
 or 
 
-`https://evanwill.github.io/choose-your-own-csv/?csv=https://docs.google.com/spreadsheets/d/e/2PACX-1vSn7AA-cbsXT3_nNUGftc1ab-CKXOJHMQCIENeR9NHElbyI9_qA99o0-HNZdG04v-M2_N21bUe_krQQ/pub?output=csv`
+`https://evanwill.github.io/choose-your-own-csv/?csv=https://docs.google.com/spreadsheets/d/e/2PACX-1vSUe5ZvNEPQ4wRTYbewm4OMBWIX4u6CAadsTcw-HDDXBgqWnyVvXOlwPrNfex62uRGUZY23Z-WyYwdn/pub?output=csv`
 
 **Note:** the metadata URL can not have any `&` (i.e. additional query string parameters). 
 Having a `&` in the URL will cause the parsing to fail.

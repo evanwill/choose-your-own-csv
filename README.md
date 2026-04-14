@@ -14,6 +14,7 @@ The website uses query strings to track where the reader is in the story.
 Each instance of choose-your-own-csv can be configured to host multiple stories.
 The basics are configured from a central file, including the site title, site description, and story-csv values.
 The project provides templates for basic content pages that can provide context, introductions, and about type content pages on the site to supplement the "story" templates.
+The template can also load story CSVs published anywhere on the web!
 
 Stack:
 
