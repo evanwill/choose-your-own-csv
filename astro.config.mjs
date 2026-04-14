@@ -12,5 +12,5 @@ export default defineConfig({
   // set base to that path.  For example, a repo named "my-story" at
   // https://username.github.io/my-story/ would use: base: '/my-story'
   // Leave as '/' (or remove the line) for a root / custom domain deployment.
-  base: '/choose-your-own-csv',
+  base: '/choose-your-own-csv/',
 });
