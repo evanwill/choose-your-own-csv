@@ -1,0 +1,31 @@
+---
+/**
+ * ContentLayout.astro — layout for Markdown content pages.
+ *
+ * Used by pages in src/pages/ that are written in Markdown.
+ * Reads `title` (and optional `description`) from the page's
+ * front matter and renders a <h1> heading above the body text.
+ *
+ * Front matter props forwarded from the Markdown page:
+ *   title       – page heading and browser-tab title (required)
+ *   description – optional <meta> description override
+ */
+import Layout from './Layout.astro';
+import { siteFooter } from '../config.js';
+
+interface Props {
+  frontmatter: {
+    title: string;
+    description?: string;
+  };
+}
+
+const { frontmatter } = Astro.props;
+---
+<Layout title={frontmatter.title} description={frontmatter.description}>
+  <div class="container">
+    <h1>{frontmatter.title}</h1>
+    <slot />
+  </div>
+  <span slot="footer">{siteFooter}</span>
+</Layout>
