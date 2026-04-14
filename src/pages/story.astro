@@ -1,0 +1,383 @@
+---
+// story.astro — interactive story player
+//
+// This page is a static HTML shell; all story rendering happens in the
+// browser via the inline <script> at the bottom of this file.
+//
+// Supported URL query parameters:
+//   ?story=<id>   — which configured story to load (matches config.js story id)
+//   ?id=<storyId> — which story entry (row) to display (matches the CSV `id` column)
+//   ?csv=<url>    — (development mode only) override the CSV URL
+//
+// Navigation flow:
+//   1. Parse query string to find which story / entry to show.
+//   2. Look up the CSV URL from the embedded site config
+//      (or use the ?csv= override in dev mode).
+//   3. Check sessionStorage for a cached parse result.
+//   4. If not cached, fetch the CSV and parse it with PapaParse.
+//   5. Find the matching row, render title + text (basic Markdown) + choices.
+//   6. Each choice link updates the URL and re-renders the page.
+import Layout from '../layouts/Layout.astro';
+import { siteFooter, stories, developmentMode } from '../config.js';
+
+// Embed the config data into the page as a JSON blob so the client-side
+// script can access it without an extra network request.
+const configData = JSON.stringify({ stories, developmentMode });
+
+// Pass the base URL so client-side links work in subdirectory deployments.
+const base = import.meta.env.BASE_URL;
+---
+<Layout title="Story">
+  <div class="story-container">
+
+    <!-- Story title shown at the top of the player (updated by JS) -->
+    <p id="story-loading">Loading story…</p>
+    <p id="story-error" style="display:none"></p>
+
+    <!-- Story content (hidden until data is ready) -->
+    <article id="story-page" style="display:none" aria-live="polite">
+      <h1 class="story-page-title" id="entry-title"></h1>
+      <div class="story-page-text" id="entry-text"></div>
+
+      <!-- Choices section (hidden when there are none) -->
+      <section id="choices-section" style="display:none">
+        <p class="choices-label">What do you do?</p>
+        <ul class="choices-list" id="choices-list"></ul>
+      </section>
+
+      <!-- Dead-end message (shown when there are no choices) -->
+      <p class="story-end" id="story-end" style="display:none">
+        ☞ The End.
+      </p>
+
+      <!-- Navigation: restart link -->
+      <nav class="story-nav" id="story-nav"></nav>
+    </article>
+
+  </div>
+
+  <span slot="footer">{siteFooter}</span>
+</Layout>
+
+<!--
+  PapaParse — lightweight CSV parser, loaded from CDN.
+  https://www.papaparse.com/
+-->
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+<script is:inline define:vars={{ configData, base }}>
+// ============================================================
+// choose-your-own-csv — story player script
+// ============================================================
+
+// Parse the site config that was embedded by Astro at build time.
+const SITE_CONFIG = JSON.parse(configData);
+
+// ------------------------------------------------------------
+// Minimal Markdown renderer
+// Supports: **bold**, *italic*, `code`, [link](url),
+//           paragraphs (blank lines), line breaks (\n).
+// ------------------------------------------------------------
+function renderMarkdown(text) {
+  if (!text) return '';
+
+  // Split into paragraphs on blank lines
+  const paragraphs = text.split(/\n{2,}/);
+
+  return paragraphs.map(para => {
+    // Inline rules (order matters)
+    let html = para
+      // Escape HTML entities first to prevent XSS
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      // Bold: **text** or __text__
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/__(.+?)__/g, '<strong>$1</strong>')
+      // Italic: *text* or _text_
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/_(.+?)_/g, '<em>$1</em>')
+      // Inline code: `code`
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      // Links: [label](url) — only allow http/https/relative URLs
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, url) => {
+        // Block javascript: and data: URLs to prevent XSS
+        const safe = /^(https?:\/\/|\/|\.\/)/.test(url.trim());
+        return safe
+          ? `<a href="${url.trim()}" target="_blank" rel="noopener">${label}</a>`
+          : `<span>${label}</span>`;
+      })
+      // Line breaks within a paragraph
+      .replace(/\n/g, '<br>');
+
+    return `<p>${html}</p>`;
+  }).join('\n');
+}
+
+// ------------------------------------------------------------
+// DOM helpers
+// ------------------------------------------------------------
+function show(el) { el.style.display = ''; }
+function hide(el) { el.style.display = 'none'; }
+
+function showError(message) {
+  const loadingEl = document.getElementById('story-loading');
+  const errorEl   = document.getElementById('story-error');
+  if (loadingEl) hide(loadingEl);
+  if (errorEl)   { errorEl.innerHTML = message; show(errorEl); }
+}
+
+// ------------------------------------------------------------
+// Query string helpers
+// ------------------------------------------------------------
+function getParam(name) {
+  return new URLSearchParams(window.location.search).get(name) || '';
+}
+
+/**
+ * Build a URL for a story entry link.
+ * Preserves the ?story= and ?csv= params so navigation stays self-contained.
+ */
+function entryUrl(entryId) {
+  const params = new URLSearchParams(window.location.search);
+  params.set('id', entryId);
+  return `${window.location.pathname}?${params.toString()}`;
+}
+
+// ------------------------------------------------------------
+// Session storage cache
+// Each story's parsed rows are cached under a key derived from its CSV URL
+// so the CSV is only fetched once per browser session.
+// ------------------------------------------------------------
+function cacheKey(csvUrl) {
+  return `cyoc_csv_${csvUrl}`;
+}
+
+function loadCached(csvUrl) {
+  try {
+    const raw = sessionStorage.getItem(cacheKey(csvUrl));
+    return raw ? JSON.parse(raw) : null;
+  } catch (_) { return null; }
+}
+
+function saveCache(csvUrl, rows) {
+  try { sessionStorage.setItem(cacheKey(csvUrl), JSON.stringify(rows)); } catch (_) {}
+}
+
+// ------------------------------------------------------------
+// Resolve the CSV URL to use
+// Priority:
+//   1. ?csv= param (only in development mode)
+//   2. CSV URL from the configured story matching ?story= param
+//   3. First configured story (fallback)
+//
+// If the resolved CSV path starts with '/' (site-relative), the base URL is
+// prepended so assets under public/ work in subdirectory deployments.
+// ------------------------------------------------------------
+function resolveCsvUrl() {
+  const devMode = SITE_CONFIG.developmentMode;
+  const storyParam = getParam('story');
+  const csvParam   = getParam('csv');
+
+  // Dev-mode override — used as-is (absolute URL or user-supplied path)
+  if (devMode && csvParam) return csvParam;
+
+  // Find configured story by id
+  const stories = SITE_CONFIG.stories || [];
+  let csvPath = null;
+  if (storyParam) {
+    const match = stories.find(s => s.id === storyParam);
+    if (match) csvPath = match.csv;
+  }
+
+  // Fallback: first story
+  if (!csvPath && stories.length > 0) csvPath = stories[0].csv;
+
+  if (!csvPath) return null;
+
+  // Prepend the base URL for site-relative paths (e.g. "/assets/story.csv")
+  // so they resolve correctly when the site is hosted in a subdirectory.
+  if (csvPath.startsWith('/') && base !== '/') {
+    // base already ends with '/', csvPath starts with '/' — strip one slash
+    return base.replace(/\/$/, '') + csvPath;
+  }
+  return csvPath;
+}
+
+// ------------------------------------------------------------
+// Render a single story entry from parsed CSV rows
+// ------------------------------------------------------------
+function renderEntry(rows, entryId) {
+  const loadingEl        = document.getElementById('story-loading');
+  const storyPageEl      = document.getElementById('story-page');
+  const titleEl          = document.getElementById('entry-title');
+  const textEl           = document.getElementById('entry-text');
+  const choicesSectionEl = document.getElementById('choices-section');
+  const choicesListEl    = document.getElementById('choices-list');
+  const storyEndEl       = document.getElementById('story-end');
+  const storyNavEl       = document.getElementById('story-nav');
+
+  // Default to the first row if no id is specified
+  const targetId = entryId || (rows.length > 0 ? rows[0].id : null);
+
+  if (!targetId) {
+    showError('<strong>Error:</strong> The story CSV appears to be empty.');
+    return;
+  }
+
+  // Find the matching row
+  const entry = rows.find(r => String(r.id).trim() === String(targetId).trim());
+
+  if (!entry) {
+    showError(
+      `<strong>Error:</strong> Could not find a story entry with id <code>${targetId}</code>. ` +
+      `Check that the <code>id</code> values in your CSV are correct.`
+    );
+    return;
+  }
+
+  // ---- Title ----
+  titleEl.textContent = entry.title || '(no title)';
+
+  // ---- Body text (Markdown) ----
+  textEl.innerHTML = renderMarkdown(entry.text || '');
+
+  // ---- Choices ----
+  // Gather all choice_1, choice_2, … columns in order
+  const choiceKeys = Object.keys(entry)
+    .filter(k => /^choice_\d+$/.test(k))
+    .sort((a, b) => {
+      // Sort numerically: choice_1 < choice_2 < …
+      const numA = parseInt(a.split('_')[1], 10);
+      const numB = parseInt(b.split('_')[1], 10);
+      return numA - numB;
+    });
+
+  // Filter out empty choice values
+  const choices = choiceKeys
+    .map(k => (entry[k] || '').trim())
+    .filter(v => v !== '');
+
+  choicesListEl.innerHTML = '';
+
+  if (choices.length > 0) {
+    choices.forEach(choice => {
+      // Each choice follows the format: "Link text|target-id"
+      const pipeIndex = choice.lastIndexOf('|');
+
+      let label, targetEntryId;
+      if (pipeIndex !== -1) {
+        label         = choice.slice(0, pipeIndex).trim();
+        targetEntryId = choice.slice(pipeIndex + 1).trim();
+      } else {
+        // No pipe found — treat the whole value as both label and id
+        label         = choice;
+        targetEntryId = choice;
+      }
+
+      const li = document.createElement('li');
+      const a  = document.createElement('a');
+      a.className = 'choice-link';
+      a.href      = entryUrl(targetEntryId);
+      a.textContent = label;
+      li.appendChild(a);
+      choicesListEl.appendChild(li);
+    });
+
+    show(choicesSectionEl);
+    hide(storyEndEl);
+  } else {
+    // Dead-end — no choices
+    hide(choicesSectionEl);
+    show(storyEndEl);
+  }
+
+  // ---- Navigation ----
+  // Determine the first entry id so we can offer a "Restart" link
+  const firstId = rows.length > 0 ? rows[0].id : null;
+  storyNavEl.innerHTML = '';
+  if (firstId && String(firstId).trim() !== String(targetId).trim()) {
+    const restart = document.createElement('a');
+    restart.href = entryUrl(firstId);
+    restart.textContent = '↩ Restart story';
+    storyNavEl.appendChild(restart);
+    storyNavEl.appendChild(document.createTextNode(' · '));
+  }
+  const homeLink = document.createElement('a');
+  homeLink.href = base;
+  homeLink.textContent = '⌂ Home';
+  storyNavEl.appendChild(homeLink);
+
+  // ---- Show the card ----
+  if (loadingEl) hide(loadingEl);
+  show(storyPageEl);
+}
+
+// ------------------------------------------------------------
+// Main entry point — runs when the DOM is ready
+// ------------------------------------------------------------
+async function init() {
+  const csvUrl  = resolveCsvUrl();
+  const entryId = getParam('id');
+
+  if (!csvUrl) {
+    showError(
+      'No story CSV configured. ' +
+      'Please edit <code>src/config.js</code> and add at least one story, ' +
+      `or use the <a href="${base}">home page</a> to load a CSV.`
+    );
+    return;
+  }
+
+  // Try cache first
+  const cached = loadCached(csvUrl);
+  if (cached) {
+    renderEntry(cached, entryId);
+    return;
+  }
+
+  // Fetch + parse with PapaParse
+  Papa.parse(csvUrl, {
+    download: true,
+    header: true,       // Use the first row as column names
+    skipEmptyLines: true,
+    complete(results) {
+      if (!results.data || results.data.length === 0) {
+        showError(
+          `<strong>Error:</strong> The CSV loaded from <code>${csvUrl}</code> ` +
+          `is empty or could not be parsed. Check the URL and make sure the file ` +
+          `follows the <a href="${base}docs/spreadsheet_setup.md">spreadsheet format</a>.`
+        );
+        return;
+      }
+
+      // Validate that the required columns exist
+      const firstRow = results.data[0];
+      if (!('id' in firstRow) || !('title' in firstRow) || !('text' in firstRow)) {
+        showError(
+          '<strong>Error:</strong> The CSV is missing required columns. ' +
+          'Make sure the first row contains at least: <code>id, title, text, choice_1</code>.'
+        );
+        return;
+      }
+
+      saveCache(csvUrl, results.data);
+      renderEntry(results.data, entryId);
+    },
+    error(err) {
+      showError(
+        `<strong>Error loading CSV:</strong> ${err.message || err}. ` +
+        `Check that the URL is publicly accessible and try again. ` +
+        `(URL: <code>${csvUrl}</code>)`
+      );
+    }
+  });
+}
+
+// Run once the DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
