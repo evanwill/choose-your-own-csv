@@ -75,7 +75,7 @@ Your story lives in a CSV with these required columns:
 | `id` | Unique identifier for each story entry (row) |
 | `title` | Heading displayed at the top of the story page |
 | `text` | Body text (supports basic Markdown) |
-| `choice_1` | First choice link in the format `Link text\|target-id` |
+| `choice_1` | First choice link in the format `Link text|target-id` |
 | `choice_2`, `choice_3`, … | Additional choices (add as many columns as you need) |
 
 See `docs/spreadsheet_setup.md` for full details and `docs/story-example.csv` for a working example.
