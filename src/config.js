@@ -10,20 +10,11 @@
 export const siteTitle = "Choose Your Own CSV";
 
 // A short description of the site used in the <meta> description tag.
-export const siteDescription =
-  "Interactive nonlinear narrative stories generated from a spreadsheet.";
+export const siteDescription = "Interactive nonlinear narrative stories published from a spreadsheet.";
 
 // The footer text for the site.
 export const siteFooter = "Built with choose-your-own-csv.";
 
-// ----------------------------------------------------------
-// Development mode
-// ----------------------------------------------------------
-// When true, a form will appear on the home page letting visitors
-// enter any CSV URL to load as a story — great for prototyping
-// and sharing works-in-progress.
-// Set to false when you are ready to publish your final site.
-export const developmentMode = true;
 
 // ----------------------------------------------------------
 // Stories
@@ -40,8 +31,7 @@ export const stories = [
   {
     id: "demo",
     title: "Demo Story",
-    description:
-      "A short branching-narrative demo that shows how the spreadsheet format works.",
+    description: "A short branching-narrative demo that shows how the spreadsheet format works.",
     csv: "/assets/story-example.csv",
   },
   // Add more stories here, for example:
@@ -52,3 +42,9 @@ export const stories = [
   //   csv: "https://docs.google.com/spreadsheets/d/e/YOUR_KEY/pub?output=csv",
   // },
 ];
+
+// ----------------------------------------------------------
+// Development mode
+// ----------------------------------------------------------
+// When true, a form will appear on the home page letting visitors enter any CSV URL to load as a story 
+export const developmentMode = true;

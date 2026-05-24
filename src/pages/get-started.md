@@ -12,7 +12,7 @@ When complete, publish your CSV to the web or add it to your own instance of cho
 
 ## Story Spreadsheet Conventions
 
-To create your story you will need to follow a very specific convention in the spreadsheet.
+To create your story you will need to follow a **very specific convention** in the spreadsheet.
 
 Your spreadsheet must have the columns: `id,title,text,choice_1`
 Additional "choices" can be added by adding more columns named "choice_" + number, like `choice_2,choice_3,choice_4` etc.
@@ -36,6 +36,19 @@ The column values follow these conventions:
     - Additional choices can be added by adding additional "choice_" columns, such as "choice_2", "choice_3" etc. Each choice follows the same convention. The template will parse as many as you add, however, most projects stick to 3. 
     - If left blank, the entry will be an dead end with no further links.
 
+*Be especially careful with column names in the first row!*
+They need to exactly follow the template: lowercase, with no spaces, and no extra white space at the end of the value.
+
+### Title Row
+
+The *first row* in the spreadsheet should have the "id" value `info`, and will contain the story's title, description, and first page.
+Use the standard columns following these conventions:
+
+- id: `info`
+- title: the story's over all title, used for it's catalog listing and "front cover" display.
+- text: the story's over all description, used used for it's catalog listing and "front cover" display.
+- choice_1: text and link to the first entry in your story. e.g. `Read|1`.
+
 ## Publish Your Story CSV
 
 You have three main options for publishing your CSV:
@@ -48,24 +61,34 @@ For prototyping, the easiest is Google Sheets.
 
 On the Sheet, ensure your story data is the first sheet tab (by default "Sheet1").
 Then go to File > Share > Publish to the Web.
-
 On the popup modal, use the dropdowns in "Link" tab to select "Entire Document" and "Comma-separated values (.csv)" options, then click the "Publish" button.
-
 Copy the link that is provided.
 
-## Test and Share via URL
+Your CSV can also be hosted directly in your project--this is the best option for long term access and performance.
+See ["docs/spreadsheet_publish.md"](https://github.com/evanwill/choose-your-own-csv/blob/main/docs/spreadsheet_publish.md) for full details.
 
-To test your work, the default template can load any story CSV--look for the form on the home page!
+## Test
+
+To test your work, the default [choose-your-own-csv](https://evanwill.github.io/choose-your-own-csv/) can load any story CSV--look for the form on the home page!
+
+## Share via URL 
 
 To share with others, you can add your CSV link as a parameter in the URL.
-Add your full CSV link to the end of the choose-your-own-csv instance's URL as the "csv" option, like:
+Add your full CSV link to the end of the choose-your-own-csv instance's `/story/` URL as the "csv" option, like:
 
 `https://evanwill.github.io/choose-your-own-csv/story/?csv=<your story url here>`
 
 For example:
 
-`https://evanwill.github.io/choose-your-own-csv/?csv=https://docs.google.com/spreadsheets/d/e/2PACX-1vSUe5ZvNEPQ4wRTYbewm4OMBWIX4u6CAadsTcw-HDDXBgqWnyVvXOlwPrNfex62uRGUZY23Z-WyYwdn/pub?output=csv`
+`https://evanwill.github.io/choose-your-own-csv/story/?csv=https://docs.google.com/spreadsheets/d/e/2PACX-1vSUe5ZvNEPQ4wRTYbewm4OMBWIX4u6CAadsTcw-HDDXBgqWnyVvXOlwPrNfex62uRGUZY23Z-WyYwdn/pub?output=csv`
 
 or 
 
 `https://evanwill.github.io/choose-your-own-csv/story/?csv=https://raw.githubusercontent.com/evanwill/choose-your-own-csv/refs/heads/main/public/assets/story-example.csv`
+
+## Host Your Own
+
+You can create a copy of the [choose-your-own-csv](https://github.com/evanwill/choose-your-own-csv) project if you would like to host your own instance.
+Each instance can be configured with a catalog of stories!
+
+Check the ["docs"](https://github.com/evanwill/choose-your-own-csv/tree/main/docs) folder for full details.

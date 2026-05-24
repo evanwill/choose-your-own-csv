@@ -1,6 +1,7 @@
-# Getting Started with choose-your-own-csv
+# Getting Started Developing choose-your-own-csv
 
-choose-your-own-csv is an [Astro](https://astro.build/) static-site template that generates interactive, branching-narrative stories from a CSV spreadsheet.
+choose-your-own-csv is an [Astro](https://astro.build/) static-site template that publishes interactive, branching-narrative stories from a CSV spreadsheet.
+If you want to host and share (develop) your own instance, follow these instructions.
 
 ## Prerequisites
 
@@ -64,28 +65,13 @@ choose-your-own-csv/
 
 ---
 
-## Creating Your Story
+## Adding Stories
 
 ### Step 1 — Prepare your CSV
 
-Your story lives in a CSV with these required columns:
+Follow the conventions in "spreadsheet_setup.md" to write an story.
 
-| Column | Description |
-|--------|-------------|
-| `id` | Unique identifier for each story entry (row) |
-| `title` | Heading displayed at the top of the story page |
-| `text` | Body text (supports basic Markdown) |
-| `choice_1` | First choice link in the format `Link text|target-id` |
-| `choice_2`, `choice_3`, … | Additional choices (add as many columns as you need) |
-
-See `docs/spreadsheet_setup.md` for full details and `docs/story-example.csv` for a working example.
-
-**Tips:**
-- `id` values must be unique and URL-safe (letters, numbers, hyphens).
-- Choices that are left blank are ignored — a page with no choices shows "The End."
-- The `text` column supports: `**bold**`, `*italic*`, `` `code` ``, `[link](url)`.
-
-### Step 2 — Add the CSV to the project
+### Step 2 — Publish the CSV on the web
 
 Copy your CSV into `public/assets/`:
 
@@ -95,7 +81,7 @@ public/assets/my-story.csv
 
 Or host it externally (e.g. publish a Google Sheet — see `docs/spreadsheet_publish.md`).
 
-### Step 3 — Register the story in `src/config.js`
+### Step 3 — Register the project
 
 Open `src/config.js` and add an entry to the `stories` array:
 
@@ -188,7 +174,7 @@ For root-domain deployments you can remove (or set to `'/'`) the `base` option i
 
 ---
 
-## Customising the Look
+## Customizing the Look
 
 All styles live in `public/styles/global.css`.  
 The file uses [CSS custom properties](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties) (variables) at the top — changing those is the quickest way to re-theme the site:
