@@ -10,7 +10,7 @@
 export const siteTitle = "Choose Your Own CSV";
 
 // A short description of the site used in the <meta> description tag.
-export const siteDescription = "Interactive nonlinear narrative stories generated from a spreadsheet.";
+export const siteDescription = "Interactive nonlinear narrative stories published from a spreadsheet.";
 
 // The footer text for the site.
 export const siteFooter = "Built with choose-your-own-csv.";
