@@ -242,6 +242,10 @@ function renderEntry(rows, entryId) {
   // ---- Body text (Markdown) ----
   textEl.innerHTML = renderMarkdown(entry.text || '');
 
+  // Detect the optional info/cover row (id === "info")
+  const isCover = String(entry.id).trim() === 'info';
+  storyPageEl.classList.toggle('story-cover', isCover);
+
   // ---- Choices ----
   // Gather all choice_1, choice_2, … columns in order
   const choiceKeys = Object.keys(entry)
@@ -260,7 +264,30 @@ function renderEntry(rows, entryId) {
 
   choicesListEl.innerHTML = '';
 
-  if (choices.length > 0) {
+  if (isCover) {
+    // Cover page: render choice_1 as a prominent "Begin" button
+    const choice1 = (entry.choice_1 || '').trim();
+    if (choice1) {
+      const pipeIndex = choice1.lastIndexOf('|');
+      let label, targetEntryId;
+      if (pipeIndex !== -1) {
+        label         = choice1.slice(0, pipeIndex).trim() || 'Begin Story';
+        targetEntryId = choice1.slice(pipeIndex + 1).trim();
+      } else {
+        label         = 'Begin Story';
+        targetEntryId = choice1;
+      }
+      const a = document.createElement('a');
+      a.className   = 'story-begin-btn';
+      a.href        = entryUrl(targetEntryId);
+      a.textContent = label;
+      choicesListEl.appendChild(a);
+      show(choicesSectionEl);
+    } else {
+      hide(choicesSectionEl);
+    }
+    hide(storyEndEl);
+  } else if (choices.length > 0) {
     choices.forEach(choice => {
       // Each choice follows the format: "Link text|target-id"
       const pipeIndex = choice.lastIndexOf('|');
