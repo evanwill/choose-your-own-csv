@@ -4,8 +4,8 @@ Once you have the correct link to a story-csv, you can view your story on choose
 There is several options:
 
 - Load on Development Mode
-- Configure a choose-your-own-csv instance
 - Share via URL
+- Configure a choose-your-own-csv instance
 
 ## Load on Development Mode
 
@@ -16,6 +16,24 @@ This is great for collaborating and prototyping.
 You do not need your own copy of the choose-your-own-csv site or any configuration.
 
 *Note:* development mode can be turned off in your "config.js" by setting `developmentMode = false`.
+
+## Share via URL
+
+To share your work with others, the choose-your-own-csv can also load any CSV specified as a parameter in the URL.
+Add your full CSV link to the end of the choose-your-own-csv instance's `/story/` URL as the "csv" option, like:
+
+`https://evanwill.github.io/choose-your-own-csv/story/?csv=<your story url here>`
+
+For example:
+
+`https://evanwill.github.io/choose-your-own-csv/story/?csv=https://raw.githubusercontent.com/evanwill/choose-your-own-csv/refs/heads/main/public/assets/story-example.csv`
+
+or 
+
+`https://evanwill.github.io/choose-your-own-csv/story/?csv=https://docs.google.com/spreadsheets/d/e/2PACX-1vSUe5ZvNEPQ4wRTYbewm4OMBWIX4u6CAadsTcw-HDDXBgqWnyVvXOlwPrNfex62uRGUZY23Z-WyYwdn/pub?output=csv`
+
+**Note:** the metadata URL can not have any `&` (i.e. additional query string parameters). 
+Having a `&` in the URL will cause the parsing to fail.
 
 ## Configure in Project
 
@@ -38,24 +56,6 @@ Add an new entry to the array, following the template object:
 - **title:** display name on the story list.
 - **description:** short blurb shown beneath the title.
 - **csv:** URL of the story-csv file, a relative path in "public" in this project, or a full URL.
-
-## Share via URL
-
-To share your work with others, the choose-your-own-csv can also load any CSV specified as a parameter in the URL.
-Add your full CSV link to the end of the choose-your-own-csv instance's `/story/` URL as the "csv" option, like:
-
-`https://evanwill.github.io/choose-your-own-csv/story/?csv=<your story url here>`
-
-For example:
-
-`https://evanwill.github.io/choose-your-own-csv/story/?csv=https://raw.githubusercontent.com/evanwill/choose-your-own-csv/refs/heads/main/public/assets/story-example.csv`
-
-or 
-
-`https://evanwill.github.io/choose-your-own-csv/story/?csv=https://docs.google.com/spreadsheets/d/e/2PACX-1vSUe5ZvNEPQ4wRTYbewm4OMBWIX4u6CAadsTcw-HDDXBgqWnyVvXOlwPrNfex62uRGUZY23Z-WyYwdn/pub?output=csv`
-
-**Note:** the metadata URL can not have any `&` (i.e. additional query string parameters). 
-Having a `&` in the URL will cause the parsing to fail.
 
 ## Loading and Refreshing
 
