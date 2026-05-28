@@ -299,6 +299,29 @@ main {
   color: #fff;
 }
 
+/* story illustration image */
+.entry-image {
+  margin-block: 0.75rem var(--spacing);
+}
+
+.entry-image img {
+  border-radius: var(--radius);
+  max-height: 360px;
+  width: 100%;
+  object-fit: cover;
+}
+
+/* cover image — full width, taller, with extra bottom space */
+.entry-image--cover {
+  margin-block: var(--spacing) calc(var(--spacing) * 1.5);
+}
+
+.entry-image--cover img {
+  max-height: 480px;
+  border-radius: calc(var(--radius) * 1.5);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+}
+
 /* dead-end / ending message */
 .story-end {
   color: var(--color-muted);
