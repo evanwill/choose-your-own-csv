@@ -34,6 +34,12 @@ export const stories = [
     description: "A short branching-narrative demo that shows how the spreadsheet format works.",
     csv: "/assets/story-example.csv",
   },
+  {
+    id: "demo2",
+    title: "A Fresh Adventure Ahead",
+    description: "A very short story demonstrating illustrations.",
+    csv: "/assets/illustrated-story-example.csv",
+  },
   // Add more stories here, for example:
   // {
   //   id: "my-story",
