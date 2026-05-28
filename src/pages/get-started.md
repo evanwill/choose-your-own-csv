@@ -14,9 +14,9 @@ When complete, publish your CSV to the web or add it to your own instance of cho
 
 To create your story you will need to follow a **very specific convention** in the spreadsheet.
 
-Your spreadsheet must have the columns: `id,title,text,choice_1`
+Your spreadsheet must have the columns: `id`, `title`, `text`, and `choice_1`.
 Additional "choices" can be added by adding more columns named "choice_" + number, like `choice_2,choice_3,choice_4` etc.
-The typical starter template has the columns: `id,title,text,choice_1,choice_2,choice_3`.
+The typical starter template has the columns like: `id,title,text,choice_1,choice_2,choice_3`
 
 Each row in the spreadsheet will be one story entry. 
 The entries each become a "story page" featuring a title and body text.
@@ -42,12 +42,23 @@ They need to exactly follow the template: lowercase, with no spaces, and no extr
 ### Title Row
 
 The *first row* in the spreadsheet should have the "id" value `info`, and will contain the story's title, description, and first page.
+This information will appear like a cover page for your story.
 Use the standard columns following these conventions:
 
 - id: `info`
 - title: the story's over all title, used for it's catalog listing and "front cover" display.
 - text: the story's over all description, used used for it's catalog listing and "front cover" display.
 - choice_1: text and link to the first entry in your story. e.g. `Read|1`.
+
+### Optional Images
+
+Images can be added to your story by adding two additional columns to your spreadsheet, `image_link` and `alt_text`.
+Each "story page" (row) can have one image which will be displayed below the heading.
+
+The image columns follow these conventions:
+
+- **image_link:** a URL to an image file.
+- **alt_text:** a textual description of the contents of the image. This value is used for accessibility purposes when the image can not be displayed to the user. See [WAI Images Tutorial](https://www.w3.org/WAI/tutorials/images/) for tips.
 
 ## Publish Your Story CSV
 
