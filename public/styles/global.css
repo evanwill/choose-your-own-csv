@@ -336,6 +336,23 @@ main {
   font-size: 0.9rem;
 }
 
+/* share button (cover page) */
+.story-share-btn {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  font-size: inherit;
+  padding: 0;
+  text-decoration: underline;
+  vertical-align: baseline;
+}
+.story-share-btn:hover { color: var(--color-accent-hover); }
+.story-share-btn--copied { color: #2e7d32; text-decoration: none; }
+
 /* ----- Responsive tweaks ----- */
 @media (max-width: 600px) {
   html { font-size: 16px; }

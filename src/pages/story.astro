@@ -359,6 +359,55 @@ function renderEntry(rows, entryId) {
   homeLink.textContent = '⌂ Home';
   storyNavEl.appendChild(homeLink);
 
+  // Share button — cover page only
+  if (isCover) {
+    storyNavEl.appendChild(document.createTextNode(' · '));
+    const shareBtn = document.createElement('button');
+    shareBtn.className = 'story-share-btn';
+    shareBtn.setAttribute('aria-label', 'Copy link to story');
+    shareBtn.innerHTML =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>' +
+      ' <span class="share-label">Share</span>';
+    shareBtn.addEventListener('click', () => {
+      // Build a clean cover-page URL, preserving only the param that
+      // identifies the story (?story= for config stories, ?csv= for dev-mode
+      // CSV links) and stripping any ?id= navigation state.
+      const storyId = getParam('story');
+      const csvId   = getParam('csv');
+      let shareUrl;
+      if (storyId) {
+        shareUrl = `${window.location.origin}${window.location.pathname}?story=${encodeURIComponent(storyId)}`;
+      } else if (csvId) {
+        shareUrl = `${window.location.origin}${window.location.pathname}?csv=${encodeURIComponent(csvId)}`;
+      } else {
+        shareUrl = `${window.location.origin}${window.location.pathname}`;
+      }
+      const onCopied = () => {
+        shareBtn.querySelector('.share-label').textContent = 'Copied!';
+        shareBtn.classList.add('story-share-btn--copied');
+        setTimeout(() => {
+          shareBtn.querySelector('.share-label').textContent = 'Share';
+          shareBtn.classList.remove('story-share-btn--copied');
+        }, 2000);
+      };
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(shareUrl).then(onCopied).catch(() => {});
+      } else {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = shareUrl;
+          ta.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          onCopied();
+        } catch (_) {}
+      }
+    });
+    storyNavEl.appendChild(shareBtn);
+  }
+
   // ---- Show the card ----
   if (loadingEl) hide(loadingEl);
   show(storyPageEl);
