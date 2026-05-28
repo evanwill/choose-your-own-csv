@@ -1,0 +1,46 @@
+id,title,text,choice_1,choice_2,choice_3,image_link,alt_text
+info,A Fresh Adventure Ahead,A very short illustrated story for choose-your-own-csv,Begin|w1,,,https://evanwill.github.io/illustration-adventure/objects/small/fresh-adventure_sm.jpg,a young adventurer sets off with a backpack with sun rising over the horizon
+w1,An adventure begins...,"You stand with your feet on a gravel path, the morning sun just peeking above the hills on the distant horizon. You take a deep breath of the fresh, crisp air.
+
+You take one quick glance at the smoking wreckage behind you. No. It is time to go forward. Your adventure begins.
+
+How will you start your journey?",Head along the forested foot path to the West|w2,Stride straight ahead on the ancient road North|n1,Strike out across the pleasant fields to the East|e1,https://evanwill.github.io/illustration-adventure/objects/small/first-choices_sm.jpg,"a young adventurer with a backpack looks at several possible paths ahead, with a burning building behind"
+w2,Forest Path,"You follow the hard dirt pathway which gradually winds through the trees. As you proceed, the forest grows thicker and darker, the trees enclosing around you. After a while the path seems to dissipate beneath your feet, leaving you unsure of which direction is back or forward.
+
+You notice a scratching noise off to your left. You think there might be more light, maybe a clearing, off to the right.
+
+Feeling lost, which direction do you want to explore?",Investigate sound to the left|w3,Head toward light to the right|w4,Push on ahead|w5,,
+w3,A Feast Discovered,"You push through the trees towards the strange scratching noise amongst the trees.
+
+Suddenly, the source of the sound is revealed--a huge crowd of squirrels and chipmunks gathered together on the forest floor. It takes you some time to realize what they are doing--it seems to be a festival! The little creatures are dancing around in complicated patterns, drinking from tiny acorn cups, and feasting on forest treats arranged on leaf platters.
+
+At the same moment, the squirrels notice you!
+
+With in seconds you are swarmed by hundreds of angry chittering furry warriors. It does not take long for them to overwhelm you. Despite the high pitched chirping, it is an almost peaceful end for you.",,,,https://evanwill.github.io/illustration-adventure/objects/small/forest-feast_sm.jpg,huge group of squirrels dance around a forest clearing with acorn cups
+w4,The Clearing,"You struggle ahead through the trees towards what seems like a clearing--at least a bit less dark part of the forest...
+
+Suddenly, your feet fall out beneath you!
+
+You plunge into a very deep pit dug vertically into the forest dirt, your body crunching at the bottom.
+
+After slowly recovering your consciousness, you gaze around, but see nothing. The pit is at least fifty feet deep, with only the tiniest amount of light filtering down to the bottom. You slowly explore your prison. You scream. You rage. But there is no escape.  ",,,,,
+w5,Deep Forest,"You push ahead, in the direction you figure must be forward... maybe. 
+
+The forest seems to grow around you. The branches leave no space to move in any direction, pulling you into a deep woody embrace. You push, climb, thrash, struggle... but your whole world is now vegetation. There is nothing else, there is just forest. You are forest. ",,,,https://evanwill.github.io/illustration-adventure/objects/small/deep-forest_sm.jpg,a young adventurer struggles against thick trees and foliage tangling around her
+n1,Ancient Road,"Your feet drum along the well worn surface of stone. 
+
+In your enthusiasm for the start of your journey, maybe you didn't pay close attention... but suddenly, a dozen speeding chariots are upon you!
+
+Who knows where they are rushing off too, but you find yourself trampled by a seemingly endless series of horse hooves and chariot wheels. Seemingly endless, because you don't last long under this assault.",,,,,
+e1,Across the Fields,"Why follow a road when you can dance across the meadows?
+
+The fresh green fields are blanketed with growing crops and scattering of bright wild flowers.
+
+Beautiful!
+
+So beautiful!
+
+You would love to stay here forever and enjoy this moment. You take a deep breath, your identity slowly fades. You do stay here forever, in some form, as you cease to exist as an individual entity...
+
+
+",,,,https://evanwill.github.io/illustration-adventure/objects/small/fields_sm.jpg,an adventurer spreads her arms in a beautiful field surrounded by flowers
