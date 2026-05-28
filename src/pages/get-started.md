@@ -8,7 +8,7 @@ Alternatively, you use any spreadsheet program starting from the [story-template
 
 Follow the conventions outlined below to develop your narrative in the spreadsheet.
 
-When complete, publish your CSV to the web or add it to your own instance of choose-your-own-csv template.
+When complete, publish your CSV to the web or add it to your own instance of the choose-your-own-csv template!
 
 ## Story Spreadsheet Conventions
 
@@ -80,7 +80,8 @@ See ["docs/spreadsheet_publish.md"](https://github.com/evanwill/choose-your-own-
 
 ## Test
 
-To test your work, the default [choose-your-own-csv](https://evanwill.github.io/choose-your-own-csv/) can load any story CSV--look for the form on the home page!
+To test your work, the default [choose-your-own-csv](https://evanwill.github.io/choose-your-own-csv/) can load any story CSV.
+Look for the form on the home page and paste in the link to your Story CSV!
 
 ## Share via URL 
 
@@ -102,4 +103,4 @@ or
 You can create a copy of the [choose-your-own-csv](https://github.com/evanwill/choose-your-own-csv) project if you would like to host your own instance.
 Each instance can be configured with a catalog of stories!
 
-Check the ["docs"](https://github.com/evanwill/choose-your-own-csv/tree/main/docs) folder for full details.
+Please visit the ["docs" folder](https://github.com/evanwill/choose-your-own-csv/tree/main/docs) folder for full details on all these steps.
