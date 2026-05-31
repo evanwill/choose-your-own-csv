@@ -129,11 +129,7 @@ main {
 .story-card:hover { border-color: var(--color-accent); }
 
 .story-card--local {
-  border-color: #8b6f2c;
-}
-
-.story-card--local:hover {
-  border-color: #6d551f;
+  border-color: #4E6BCF;
 }
 
 .story-card-header {
@@ -159,9 +155,9 @@ main {
 }
 
 .story-card-badge {
-  background: #f3ead3;
+  background: #4E6BCF;
   border-radius: 999px;
-  color: #6d551f;
+  color: #fff;
   flex-shrink: 0;
   font-size: 0.75rem;
   font-weight: 600;
