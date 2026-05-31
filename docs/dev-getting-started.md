@@ -35,6 +35,24 @@ The site will be available at **http://localhost:4321/**
 
 Open it in your browser. You should see the home page listing the included demo story. Click "Demo Story" to try the story player.
 
+### GitHub Codespaces
+
+This repository includes a dev container configuration for GitHub Codespaces using the current Node.js LTS release.
+
+1. Open the repository on GitHub.
+2. Click **Code** and choose **Codespaces**.
+3. Create a new Codespace on your branch.
+4. Wait for the container to finish setup. Dependencies are installed automatically when the Codespace starts.
+5. In the Codespaces terminal, start the Astro dev server:
+
+```bash
+npm run dev -- --host 0.0.0.0
+```
+
+Codespaces should automatically forward port `4321` and open the Astro preview in the browser panel.
+
+If the preview does not open automatically, open the **Ports** panel in Codespaces and use the forwarded URL for port `4321`.
+
 ---
 
 ## Project Structure

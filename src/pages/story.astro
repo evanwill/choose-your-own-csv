@@ -20,10 +20,6 @@
 import Layout from '../layouts/Layout.astro';
 import { siteFooter, stories, developmentMode } from '../config.js';
 
-// Embed the config data into the page as a JSON blob so the client-side
-// script can access it without an extra network request.
-const configData = JSON.stringify({ stories, developmentMode });
-
 // Pass the base URL so client-side links work in subdirectory deployments.
 // Normalized to always have a trailing slash so path concatenation works correctly.
 const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
@@ -69,13 +65,22 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 -->
 <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
-<script is:inline define:vars={{ configData, base }}>
+<script id="story-page-data" type="application/json" set:html={JSON.stringify({ base, stories, developmentMode })}></script>
+
+<script>
+import { loadStoryRows, rememberLocalStory } from '../scripts/story-loader.js';
+
 // ============================================================
 // choose-your-own-csv — story player script
 // ============================================================
 
-// Parse the site config that was embedded by Astro at build time.
-const SITE_CONFIG = JSON.parse(configData);
+const pageDataEl = document.getElementById('story-page-data');
+const pageData = pageDataEl ? JSON.parse(pageDataEl.textContent || '{}') : {};
+const SITE_CONFIG = {
+  stories: Array.isArray(pageData.stories) ? pageData.stories : [],
+  developmentMode: Boolean(pageData.developmentMode),
+};
+const base = pageData.base || '/';
 
 // ------------------------------------------------------------
 // Minimal Markdown renderer
@@ -146,26 +151,6 @@ function entryUrl(entryId) {
   const params = new URLSearchParams(window.location.search);
   params.set('id', entryId);
   return `${window.location.pathname}?${params.toString()}`;
-}
-
-// ------------------------------------------------------------
-// Session storage cache
-// Each story's parsed rows are cached under a key derived from its CSV URL
-// so the CSV is only fetched once per browser session.
-// ------------------------------------------------------------
-function cacheKey(csvUrl) {
-  return `cyoc_csv_${csvUrl}`;
-}
-
-function loadCached(csvUrl) {
-  try {
-    const raw = sessionStorage.getItem(cacheKey(csvUrl));
-    return raw ? JSON.parse(raw) : null;
-  } catch (_) { return null; }
-}
-
-function saveCache(csvUrl, rows) {
-  try { sessionStorage.setItem(cacheKey(csvUrl), JSON.stringify(rows)); } catch (_) {}
 }
 
 // ------------------------------------------------------------
@@ -419,6 +404,7 @@ function renderEntry(rows, entryId) {
 async function init() {
   const csvUrl  = resolveCsvUrl();
   const entryId = getParam('id');
+  const shouldRememberStory = Boolean(getParam('csv'));
 
   if (!csvUrl) {
     showError(
@@ -429,49 +415,41 @@ async function init() {
     return;
   }
 
-  // Try cache first
-  const cached = loadCached(csvUrl);
-  if (cached) {
-    renderEntry(cached, entryId);
-    return;
-  }
-
-  // Fetch + parse with PapaParse
-  Papa.parse(csvUrl, {
-    download: true,
-    header: true,       // Use the first row as column names
-    skipEmptyLines: true,
-    complete(results) {
-      if (!results.data || results.data.length === 0) {
-        showError(
-          `<strong>Error:</strong> The CSV loaded from <code>${csvUrl}</code> ` +
-          `is empty or could not be parsed. Check the URL and make sure the file ` +
-          `follows the <a href="${base}docs/spreadsheet_setup.md">spreadsheet format</a>.`
-        );
-        return;
-      }
-
-      // Validate that the required columns exist
-      const firstRow = results.data[0];
-      if (!('id' in firstRow) || !('title' in firstRow) || !('text' in firstRow)) {
-        showError(
-          '<strong>Error:</strong> The CSV is missing required columns. ' +
-          'Make sure the first row contains at least: <code>id, title, text, choice_1</code>.'
-        );
-        return;
-      }
-
-      saveCache(csvUrl, results.data);
-      renderEntry(results.data, entryId);
-    },
-    error(err) {
-      showError(
-        `<strong>Error loading CSV:</strong> ${err.message || err}. ` +
-        `Check that the URL is publicly accessible and try again. ` +
-        `(URL: <code>${csvUrl}</code>)`
-      );
+  try {
+    const rows = await loadStoryRows(csvUrl);
+    if (shouldRememberStory) {
+      rememberLocalStory(csvUrl, rows);
     }
-  });
+    renderEntry(rows, entryId);
+  } catch (error) {
+    if (error?.message === 'The CSV is missing required columns.') {
+      showError(
+        '<strong>Error:</strong> The CSV is missing required columns. ' +
+        'Make sure the first row contains at least: <code>id, title, text, choice_1</code>.'
+      );
+      return;
+    }
+
+    if (error?.message === 'The CSV is empty or could not be parsed.') {
+      showError(
+        `<strong>Error:</strong> The CSV loaded from <code>${csvUrl}</code> ` +
+        `is empty or could not be parsed. Check the URL and make sure the file ` +
+        `follows the <a href="${base}docs/spreadsheet_setup.md">spreadsheet format</a>.`
+      );
+      return;
+    }
+
+    if (error?.message === 'CSV parser unavailable.') {
+      showError('<strong>Error:</strong> CSV parser unavailable.');
+      return;
+    }
+
+    showError(
+      `<strong>Error loading CSV:</strong> ${(error && error.message) || error}. ` +
+      `Check that the URL is publicly accessible and try again. ` +
+      `(URL: <code>${csvUrl}</code>)`
+    );
+  }
 }
 
 // Run once the DOM is ready
