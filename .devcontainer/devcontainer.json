@@ -1,0 +1,23 @@
+{
+  "name": "choose-your-own-csv",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:24",
+  "updateContentCommand": "if [ -f package-lock.json ]; then npm ci; else npm install; fi",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "astro-build.astro-vscode"
+      ],
+      "settings": {
+        "files.eol": "\n"
+      }
+    }
+  },
+  "forwardPorts": [4321],
+  "portsAttributes": {
+    "4321": {
+      "label": "Astro dev server",
+      "onAutoForward": "openPreview"
+    }
+  },
+  "remoteUser": "node"
+}
