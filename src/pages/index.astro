@@ -12,6 +12,11 @@ import { siteTitle, siteDescription, siteFooter, stories, developmentMode } from
 // Base URL used to build links that work for both root and subdirectory deploys.
 // Normalized to always have a trailing slash so path concatenation works correctly.
 const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+
+const configuredStories = stories.map((story) => ({
+  ...story,
+  href: `${base}story/?story=${encodeURIComponent(story.id)}`,
+}));
 ---
 <Layout title="">
   <div class="container">
@@ -24,22 +29,34 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
     </section>
 
     <!-- Story list -->
-    {stories.length > 0 ? (
-      <section>
-        <h2>Stories</h2>
-        <ul class="story-list">
-          {stories.map(story => (
-            <li class="story-card">
+    <section>
+      <h2>Stories</h2>
+      <ul class="story-list" id="story-list">
+        {configuredStories.map((story) => (
+          <li class="story-card">
+            <div class="story-card-header">
               <!-- Links to /story/?story=<id>, which the story page reads at runtime -->
-              <a href={`${base}story/?story=${story.id}`}>{story.title}</a>
-              {story.description && <p>{story.description}</p>}
-            </li>
-          ))}
-        </ul>
-      </section>
-    ) : (
-      <p>No stories configured yet. Edit <code>src/config.js</code> to add one!</p>
-    )}
+              <a href={story.href}>{story.title}</a>
+            </div>
+            {story.description && <p>{story.description}</p>}
+            <div class="story-card-actions">
+              <button
+                type="button"
+                class="story-action-btn"
+                data-action="share"
+                data-share-url={story.href}
+              >
+                Share
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p id="story-list-empty" style={configuredStories.length > 0 ? 'display:none' : ''}>
+        No stories configured yet. Edit <code>src/config.js</code> to add one, or load a CSV below.
+      </p>
+      <p id="story-catalog-status" class="story-catalog-status" aria-live="polite"></p>
+    </section>
 
     <!-- Development-mode CSV loader ------------------------------------------
          Only rendered when developmentMode is true. Lets collaborators paste
@@ -62,6 +79,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
           />
           <button type="submit" class="btn">Load Story</button>
         </form>
+        <p id="dev-csv-status" class="dev-form-status" aria-live="polite"></p>
       </div>
     )}
 
@@ -71,19 +89,225 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
   <span slot="footer">{siteFooter}</span>
 </Layout>
 
-{/* Client-side script — only active when developmentMode === true */}
-{developmentMode && (
-  <script define:vars={{ base }}>
-    const form = document.getElementById('dev-csv-form');
-    if (form) {
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const url = (document.getElementById('dev-csv-url')).value.trim();
-        if (url) {
-          // Navigate to the story player with the CSV URL as a query param
-          window.location.href = `${base}story/?csv=${encodeURIComponent(url)}`;
-        }
-      });
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script id="index-page-data" type="application/json" set:html={JSON.stringify({ base, configuredStories, developmentMode })}></script>
+
+<script>
+  import {
+    dedupeCatalog,
+    deleteLocalCatalogEntry,
+    loadLocalCatalog,
+    loadStoryRows,
+    normalizeCatalogEntry,
+    rememberLocalStory,
+  } from '../scripts/story-loader.js';
+
+  const pageDataEl = document.getElementById('index-page-data');
+  const {
+    base = '/',
+    configuredStories = [],
+    developmentMode = false,
+  } = pageDataEl ? JSON.parse(pageDataEl.textContent || '{}') : {};
+
+  const storyListEl = document.getElementById('story-list');
+  const storyListEmptyEl = document.getElementById('story-list-empty');
+  const storyCatalogStatusEl = document.getElementById('story-catalog-status');
+  const devStatusEl = document.getElementById('dev-csv-status');
+
+  function sameListing(a, b) {
+    return a.title === b.title && a.description === b.description;
+  }
+
+  function localDisplayTitle(entry, itemsBefore) {
+    const duplicateCount = itemsBefore.filter(
+      (item) => item.csv !== entry.csv && sameListing(item, entry)
+    ).length;
+    return duplicateCount > 0 ? `${entry.title} (${duplicateCount + 1})` : entry.title;
+  }
+
+  function updateEmptyState() {
+    if (!storyListEl || !storyListEmptyEl) return;
+    storyListEmptyEl.style.display = storyListEl.children.length > 0 ? 'none' : '';
+  }
+
+  function showCatalogStatus(message, isError = false) {
+    if (!storyCatalogStatusEl) return;
+    storyCatalogStatusEl.textContent = message;
+    storyCatalogStatusEl.classList.toggle('story-catalog-status--error', isError);
+  }
+
+  function showDevStatus(message, isError = false) {
+    if (!devStatusEl) return;
+    devStatusEl.textContent = message;
+    devStatusEl.classList.toggle('dev-form-status--error', isError);
+  }
+
+  async function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      return;
     }
-  </script>
-)}
+
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+  }
+
+  function flashButtonLabel(button, label) {
+    const originalLabel = button.dataset.originalLabel || button.textContent;
+    button.dataset.originalLabel = originalLabel;
+    button.textContent = label;
+    window.setTimeout(() => {
+      button.textContent = button.dataset.originalLabel || originalLabel;
+    }, 1800);
+  }
+
+  function makeLocalStoryHref(csvUrl) {
+    return `${base}story/?csv=${encodeURIComponent(csvUrl)}`;
+  }
+
+  function createLocalCatalogCard(entry, displayTitle) {
+    const item = document.createElement('li');
+    item.className = 'story-card story-card--local';
+    item.dataset.csv = entry.csv;
+
+    const header = document.createElement('div');
+    header.className = 'story-card-header';
+
+    const link = document.createElement('a');
+    link.href = makeLocalStoryHref(entry.csv);
+    link.textContent = displayTitle;
+    header.appendChild(link);
+
+    const badge = document.createElement('span');
+    badge.className = 'story-card-badge';
+    badge.textContent = 'Local';
+    header.appendChild(badge);
+
+    item.appendChild(header);
+
+    if (entry.description) {
+      const description = document.createElement('p');
+      description.textContent = entry.description;
+      item.appendChild(description);
+    }
+
+    const actions = document.createElement('div');
+    actions.className = 'story-card-actions';
+
+    const shareButton = document.createElement('button');
+    shareButton.type = 'button';
+    shareButton.className = 'story-action-btn';
+    shareButton.dataset.action = 'share';
+    shareButton.dataset.shareUrl = makeLocalStoryHref(entry.csv);
+    shareButton.textContent = 'Share';
+    actions.appendChild(shareButton);
+
+    const refreshButton = document.createElement('button');
+    refreshButton.type = 'button';
+    refreshButton.className = 'story-action-btn';
+    refreshButton.dataset.action = 'refresh';
+    refreshButton.dataset.csv = entry.csv;
+    refreshButton.textContent = 'Refresh';
+    actions.appendChild(refreshButton);
+
+    const deleteButton = document.createElement('button');
+    deleteButton.type = 'button';
+    deleteButton.className = 'story-action-btn story-action-btn--danger';
+    deleteButton.dataset.action = 'delete';
+    deleteButton.dataset.csv = entry.csv;
+    deleteButton.textContent = 'Delete';
+    actions.appendChild(deleteButton);
+
+    item.appendChild(actions);
+    return item;
+  }
+
+  function renderLocalCatalog() {
+    if (!storyListEl) return;
+
+    storyListEl.querySelectorAll('.story-card--local').forEach((item) => item.remove());
+
+    const configuredCatalog = configuredStories.map((story) => normalizeCatalogEntry(story));
+    const localCatalog = dedupeCatalog(loadLocalCatalog()).map((item) => normalizeCatalogEntry(item));
+
+    const seenItems = [...configuredCatalog];
+    localCatalog.forEach((entry) => {
+      const displayTitle = localDisplayTitle(entry, seenItems);
+      storyListEl.appendChild(createLocalCatalogCard(entry, displayTitle));
+      seenItems.push(entry);
+    });
+
+    updateEmptyState();
+  }
+
+  if (storyListEl) {
+    storyListEl.addEventListener('click', async (event) => {
+      const button = event.target.closest('.story-action-btn');
+      if (!button) return;
+
+      const action = button.dataset.action;
+
+      if (action === 'share') {
+        try {
+          const shareUrl = new URL(button.dataset.shareUrl, window.location.origin).toString();
+          await copyText(shareUrl);
+          flashButtonLabel(button, 'Copied!');
+          showCatalogStatus('Story link copied.');
+        } catch (_) {
+          showCatalogStatus('Could not copy the story link.', true);
+        }
+        return;
+      }
+
+      if (action === 'refresh') {
+        const csvUrl = button.dataset.csv;
+        if (!csvUrl) return;
+
+        button.disabled = true;
+        try {
+          const rows = await loadStoryRows(csvUrl, { forceRefresh: true });
+          rememberLocalStory(csvUrl, rows);
+          renderLocalCatalog();
+          flashButtonLabel(button, 'Refreshed');
+          showCatalogStatus('Local story refreshed from its CSV source.');
+        } catch (error) {
+          showCatalogStatus(error.message || 'Could not refresh the story.', true);
+        } finally {
+          button.disabled = false;
+        }
+        return;
+      }
+
+      if (action === 'delete') {
+        const csvUrl = button.dataset.csv;
+        if (!csvUrl) return;
+
+        deleteLocalCatalogEntry(csvUrl);
+        renderLocalCatalog();
+        showCatalogStatus('Local story removed from this browser.');
+      }
+    });
+  }
+
+  const form = document.getElementById('dev-csv-form');
+  if (form && developmentMode) {
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const input = document.getElementById('dev-csv-url');
+      const csvUrl = String(input?.value || '').trim();
+      if (!csvUrl) return;
+
+      showDevStatus('');
+      window.location.href = makeLocalStoryHref(csvUrl);
+    });
+  }
+
+  renderLocalCatalog();
+  updateEmptyState();
+</script>

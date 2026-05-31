@@ -63,3 +63,19 @@ When a user visits your story website, javascript downloads the CSV from the lin
 Once the CSV is downloaded, the javascript stores it in the browser's session storage so that the data can be re-used with out downloading again as you navigate the story pages.
 
 If you want a fresh reload of the data (i.e. you made changes in Sheets and want to see the results), simply open the page in a new window!
+
+## Story Catalog
+
+The home page of choose-your-own-csv features a "catalog" of stories.
+Each catalog listing has a share button that allows users to quickly copy the link to share the story.
+
+By default these stories are the ones manually added to configuration (see above).
+This catalog will appear to all visitors of the instance.
+
+### Local Catalog
+
+The choose-your-own-csv site also features the functionality to save stories to a local catalog in the user's own browser storage.
+When you put a story link into the "Development Mode" form, it will automatically generate a catalog listing (using the first row).
+
+These stories will appear in the user's personal local catalog (only in this specific browser) to make it easier to use externally shared stories.
+You can manage this catalog with share, refresh, and delete buttons.
