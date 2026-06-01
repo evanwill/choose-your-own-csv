@@ -33,3 +33,5 @@ Stack:
 
 - [Astro](https://astro.build/) as base framework
 - [Papa Parse](https://www.papaparse.com/) library to directly parse CSV files
+
+Copyright © 2026 EvanWill, licensed under the GNU General Public License v3.0
