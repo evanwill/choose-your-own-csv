@@ -387,9 +387,10 @@ main {
 
 .entry-image img {
   border-radius: var(--radius);
-  max-height: 360px;
-  width: 100%;
-  object-fit: cover;
+  max-height: 390px;
+  max-width: 100%;
+  margin: auto;
+  //object-fit: cover;
 }
 
 /* cover image — full width, taller, with extra bottom space */
