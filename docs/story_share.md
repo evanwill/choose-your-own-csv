@@ -75,7 +75,7 @@ This catalog will appear to all visitors of the instance.
 ### Local Catalog
 
 The choose-your-own-csv site also features the functionality to save stories to a local catalog in the user's own browser storage.
-When you put a story link into the "Development Mode" form, it will automatically generate a catalog listing (using the first row).
+When you put a story link into the "Load Story CSV" form, it will automatically generate a catalog listing (using the first row).
 
 These stories will appear in the user's personal local catalog (only in this specific browser) to make it easier to use externally shared stories.
 You can manage this catalog with share, refresh, and delete buttons.

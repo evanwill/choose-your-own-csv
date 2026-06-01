@@ -9,10 +9,10 @@ title: About
 
 ## How It Works
 
-Each story is written as a spreadsheet following simple conventions, with rows representing the "pages" and the interlinking choices of the narrative--something like a Choose Your Own Adventure!
+Each story is written in a spreadsheet following simple conventions, with rows representing the "pages" and the interlinking choices of the narrative--something like a Choose Your Own Adventure!
 
 When a user visits the choose-your-own-csv website, it loads and parses a story CSV, generating the "story pages" to explore.
-It can load the spreadsheet from any CSV on the web (such as a published Google Sheet!), which enables live collaboration and prototyping with minimal set up.
+It can load the spreadsheet from any CSV on the web (such as a published Google Sheet!), which enables live collaboration, prototyping, and sharing with minimal set up.
 
 See [Get Started](/choose-your-own-csv/get-started/) for information about creating your own story!
 
@@ -23,5 +23,5 @@ See [Get Started](/choose-your-own-csv/get-started/) for information about creat
 
 ## License
 
-choose-your-own-csv is released under the [MIT License](https://opensource.org/licenses/MIT).
+choose-your-own-csv is released under the [GNU GPLv3 License](https://choosealicense.com/licenses/gpl-3.0/) copyright © 2026 EvanWill.
 Feel free to fork the repository, customize the styles, and publish your own stories.

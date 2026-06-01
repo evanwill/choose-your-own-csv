@@ -70,7 +70,7 @@ You have three main options for publishing your CSV:
 
 For prototyping, the easiest is Google Sheets. 
 
-On the Sheet, ensure your story data is the first sheet tab (by default "Sheet1").
+On the Sheet, ensure your story data is the first tab (by default "Sheet1").
 Then go to File > Share > Publish to the Web.
 On the popup modal, use the dropdowns in "Link" tab to select "Entire Document" and "Comma-separated values (.csv)" options, then click the "Publish" button.
 Copy the link that is provided.
@@ -78,29 +78,21 @@ Copy the link that is provided.
 Your CSV can also be hosted directly in your project--this is the best option for long term access and performance.
 See ["docs/spreadsheet_publish.md"](https://github.com/evanwill/choose-your-own-csv/blob/main/docs/spreadsheet_publish.md) for full details.
 
-## Test
+## Read and Share
 
-To test your work, the default [choose-your-own-csv](https://evanwill.github.io/choose-your-own-csv/) can load any story CSV.
-Look for the form on the home page and paste in the link to your Story CSV!
+To test, read, and share your work, the [choose-your-own-csv](https://evanwill.github.io/choose-your-own-csv/) site can load any Story CSV.
+Look for the "Load Story CSV" form on the home page and paste in the link to your spreadsheet!
 
-## Share via URL 
+The form loads the story to read and also adds it to your *local* catalog.
+When you return to the home page, it will appear in the "Stories" list.
+This listing is *only* on your personal browser to make it easier to use externally shared stories.
+You can manage your local catalog with share, refresh, and delete buttons.
 
-To share with others, you can add your CSV link as a parameter in the URL.
-Add your full CSV link to the end of the choose-your-own-csv instance's `/story/` URL as the "csv" option, like:
-
-`https://evanwill.github.io/choose-your-own-csv/story/?csv=<your story url here>`
-
-For example:
-
-`https://evanwill.github.io/choose-your-own-csv/story/?csv=https://docs.google.com/spreadsheets/d/e/2PACX-1vSUe5ZvNEPQ4wRTYbewm4OMBWIX4u6CAadsTcw-HDDXBgqWnyVvXOlwPrNfex62uRGUZY23Z-WyYwdn/pub?output=csv`
-
-or 
-
-`https://evanwill.github.io/choose-your-own-csv/story/?csv=https://raw.githubusercontent.com/evanwill/choose-your-own-csv/refs/heads/main/public/assets/story-example.csv`
+Look for the Share button on the catalog listings or cover page of any Story--click to copy the link which can be shared to anyone to read!
 
 ## Host Your Own
 
 You can create a copy of the [choose-your-own-csv](https://github.com/evanwill/choose-your-own-csv) project if you would like to host your own instance.
-Each instance can be configured with a catalog of stories!
+Each instance can be configured with a custom catalog of stories!
 
 Please visit the ["docs" folder](https://github.com/evanwill/choose-your-own-csv/tree/main/docs) folder for full details on all these steps.
