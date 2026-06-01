@@ -65,7 +65,7 @@ const configuredStories = stories.map((story) => ({
     -------------------------------------------------------------------------->
     {developmentMode && (
       <div class="dev-form">
-        <h2>Development Mode — Test and Share any Story CSV!</h2>
+        <h2>Test, Read, and Share any Story CSV!</h2>
         <p>
           Paste the URL of any CSV that follows the <a href="get-started/">spreadsheet format</a> to view it as a story.
         </p>
@@ -89,7 +89,7 @@ const configuredStories = stories.map((story) => ({
   <span slot="footer">{siteFooter}</span>
 </Layout>
 
-<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script is:inline src={`${base}assets/lib/papaparse.min.js`}></script>
 <script id="index-page-data" type="application/json" set:html={JSON.stringify({ base, configuredStories, developmentMode })}></script>
 
 <script>
