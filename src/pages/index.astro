@@ -89,7 +89,7 @@ const configuredStories = stories.map((story) => ({
   <span slot="footer">{siteFooter}</span>
 </Layout>
 
-<script is:inline src={`${base}assets/lib/papaparse.min.js`}></script>
+<script src={`${base}assets/lib/papaparse.min.js`}></script>
 <script id="index-page-data" type="application/json" set:html={JSON.stringify({ base, configuredStories, developmentMode })}></script>
 
 <script>
