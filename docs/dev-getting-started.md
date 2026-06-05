@@ -161,6 +161,14 @@ http://localhost:4321/story/?csv=https://example.com/my-story.csv
 npm run build
 ```
 
+If you want to add analytics or another site-wide tracking snippet, paste it into:
+
+```html
+src/includes/analytics.html
+```
+
+The base layout will insert that snippet at the end of the `<head>` on every page, but only for production builds. During `npm run dev`, the snippet is not rendered.
+
 The static site is output to `dist/`. Preview the production build locally:
 
 ```bash
