@@ -87,7 +87,7 @@ const configuredStories = stories.map((story) => ({
 
   <!-- Footer text -->
   <span slot="footer">{siteFooter}</span>
-</Layout>
+
 
 <script src={`${base}assets/lib/papaparse.min.js`}></script>
 <script id="index-page-data" type="application/json" set:html={JSON.stringify({ base, configuredStories, developmentMode })}></script>
@@ -311,3 +311,5 @@ const configuredStories = stories.map((story) => ({
   renderLocalCatalog();
   updateEmptyState();
 </script>
+
+</Layout>
