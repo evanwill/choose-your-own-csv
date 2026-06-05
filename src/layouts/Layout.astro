@@ -7,6 +7,7 @@
  *   description – optional <meta> description override
  */
 import { siteTitle, siteDescription } from '../config.js';
+import analyticsSnippet from '../includes/analytics.html?raw';
 
 interface Props {
   title?: string;
@@ -25,6 +26,7 @@ const pageTitle = title ? `${title} | ${siteTitle}` : siteTitle;
 // Normalize to always have a trailing slash so asset paths work correctly in
 // subdirectory deploys (e.g. "/my-story/" → "/my-story/styles/global.css").
 const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const shouldRenderAnalytics = import.meta.env.PROD && analyticsSnippet.trim().length > 0;
 ---
 <!doctype html>
 <html lang="en">
@@ -36,6 +38,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
     <!-- Global styles -->
     <link rel="stylesheet" href={`${base}styles/global.css`} />
+    {shouldRenderAnalytics && <Fragment set:html={analyticsSnippet} />}
   </head>
   <body>
     <!-- ===== Site header ===== -->
