@@ -14,6 +14,7 @@ Each story is written in a spreadsheet following simple conventions, with rows r
 When a user visits the choose-your-own-csv website, it loads and parses a story CSV, generating the "story pages" to explore.
 It can load the spreadsheet from any CSV on the web (such as a published Google Sheet!), which enables live collaboration, prototyping, and sharing with minimal set up.
 
+Creating story spreadsheets is a fun, minimal way to publish interactive narratives--while also building digital literacy skills!
 See [Get Started](/choose-your-own-csv/get-started/) for information about creating your own story!
 
 ## Technology

@@ -7,8 +7,7 @@ To create your own story with choose-your-own-csv start with a copy of the [Stor
 Alternatively, you use any spreadsheet program starting from the [story-template.csv](https://github.com/evanwill/choose-your-own-csv/blob/main/docs/story-template.csv).
 
 Follow the conventions outlined below to develop your narrative in the spreadsheet.
-
-When complete, publish your CSV to the web or add it to your own instance of the choose-your-own-csv template!
+When complete, publish your CSV to the web so it can be loaded by [choose-your-own-csv](https://evanwill.github.io/choose-your-own-csv/).
 
 ## Story Spreadsheet Conventions
 
@@ -27,7 +26,7 @@ The column values follow these conventions:
 - **id:** a unique identifier for the story entry. 
     - This allows you to reference the "page" and to be generated on the site. 
     - The id value must be unique. 
-    - It should be lowercase url-safe numbers and letters only (can include dash `-` or underscore `_`, but not other special characters). 
+    - It should be lowercase url-safe numbers and letters only (can include dash `-` or underscore `_`, but no spaces or other special characters). 
     - You can use just basic numbering (1, 2, 3, etc) or any naming convention to keep organized in your writing (p1-1, p1-2, p2-1, a1-1, or castle1, castle2, dungeon1, dungeon2, etc).
 - **title:** descriptive text that will appear larger at the top of the entry's page.
 - **text:** descriptive text that will be the body of the entry's page. Can be formatted using Markdown.
@@ -43,7 +42,7 @@ They need to exactly follow the template: lowercase, with no spaces, and no extr
 
 The *first row* in the spreadsheet should have the "id" value `info`, and will contain the story's title, description, and first page.
 This information will appear like a cover page for your story.
-Use the standard columns following these conventions:
+Fill in the standard columns following these conventions:
 
 - id: `info`
 - title: the story's over all title, used for it's catalog listing and "front cover" display.
@@ -52,12 +51,12 @@ Use the standard columns following these conventions:
 
 ### Optional Images
 
-Images can be added to your story by adding two additional columns to your spreadsheet, `image_link` and `alt_text`.
-Each "story page" (row) can have one image which will be displayed below the heading.
+Images can be featured in your story by adding two additional columns to your spreadsheet, `image_link` and `alt_text`.
+Each "story page" (row) can optionally have one image which will be displayed below the heading.
 
 The image columns follow these conventions:
 
-- **image_link:** a URL to an image file.
+- **image_link:** a full URL to an image file.
 - **alt_text:** a textual description of the contents of the image. This value is used for accessibility purposes when the image can not be displayed to the user. See [WAI Images Tutorial](https://www.w3.org/WAI/tutorials/images/) for tips.
 
 ## Publish Your Story CSV
@@ -81,7 +80,7 @@ See ["docs/spreadsheet_publish.md"](https://github.com/evanwill/choose-your-own-
 ## Read and Share
 
 To test, read, and share your work, the [choose-your-own-csv](https://evanwill.github.io/choose-your-own-csv/) site can load any Story CSV.
-Look for the "Load Story CSV" form on the home page and paste in the link to your spreadsheet!
+Look for the "Load Story CSV" form on the home page and paste in the link to your spreadsheet.
 
 The form loads the story to read and also adds it to your *local* catalog.
 When you return to the home page, it will appear in the "Stories" list.
