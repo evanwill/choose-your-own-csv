@@ -20,18 +20,39 @@ const configuredStories = stories.map((story) => ({
 ---
 <Layout title="">
   <div class="container">
-
-    <!-- Site introduction -->
-    <section class="home-intro">
-      <h1>{siteTitle}</h1>
-      <p>{siteDescription}</p>
-      <p><a href="about/">Learn more</a> or <a href="get-started/">Create your own story</a>!</p>
-    </section>
-
     <!-- Story list -->
-    <section>
-      <h2>Stories</h2>
+    <section class="story-shelf" aria-labelledby="stories-heading">
+      <div class="section-heading">
+        <div>
+          <h1 id="stories-heading">{siteTitle}</h1>
+          <p class="section-note">{siteDescription}</p>
+        </div>
+        <a class="section-link" href="get-started/">Create your own story</a>
+      </div>
       <ul class="story-list" id="story-list">
+        {developmentMode && (
+          <li class="story-card story-card--loader">
+            <div class="story-card-header">
+              <a href="get-started/">Load a Story CSV</a>
+            </div>
+            <p>Read and Share any Story CSV! Paste the URL of a CSV that follows the <a href="get-started/">spreadsheet format</a> to view it as a story.</p>
+            <div class="story-card-actions">
+              <form id="dev-csv-form" class="dev-form-inline">
+                <label class="sr-only" for="dev-csv-url">Story CSV URL</label>
+                <input
+                  type="url"
+                  id="dev-csv-url"
+                  name="csv"
+                  placeholder="https://docs.google.com/spreadsheets/d/…/pub?output=csv"
+                  required
+                />
+                <button type="submit" class="btn">Load story</button>
+              </form>
+              <p id="dev-csv-status" class="dev-form-status" aria-live="polite"></p>
+            </div>
+          </li>
+        )}
+
         {configuredStories.map((story) => (
           <li class="story-card">
             <div class="story-card-header">
@@ -40,6 +61,7 @@ const configuredStories = stories.map((story) => ({
             </div>
             {story.description && <p>{story.description}</p>}
             <div class="story-card-actions">
+              <a href={story.href} class="btn">Read</a>
               <button
                 type="button"
                 class="story-action-btn"
@@ -53,35 +75,10 @@ const configuredStories = stories.map((story) => ({
         ))}
       </ul>
       <p id="story-list-empty" style={configuredStories.length > 0 ? 'display:none' : ''}>
-        No stories configured yet. Edit <code>src/config.js</code> to add one, or load a CSV below.
+        No stories configured yet. Edit <code>src/config.js</code> to add one, or use the CSV loader above.
       </p>
       <p id="story-catalog-status" class="story-catalog-status" aria-live="polite"></p>
     </section>
-
-    <!-- Development-mode CSV loader ------------------------------------------
-         Only rendered when developmentMode is true. Lets collaborators paste
-         any CSV URL and jump straight into the story player without touching
-         the config.
-    -------------------------------------------------------------------------->
-    {developmentMode && (
-      <div class="dev-form">
-        <h2>Load Story CSV</h2>
-        <p>
-          Read and Share any Story CSV! Paste the URL of a CSV that follows the <a href="get-started/">spreadsheet format</a> to view it as a story.
-        </p>
-        <form id="dev-csv-form">
-          <input
-            type="url"
-            id="dev-csv-url"
-            name="csv"
-            placeholder="https://docs.google.com/spreadsheets/d/…/pub?output=csv"
-            required
-          />
-          <button type="submit" class="btn">Load Story</button>
-        </form>
-        <p id="dev-csv-status" class="dev-form-status" aria-live="polite"></p>
-      </div>
-    )}
 
   </div>
 
@@ -127,7 +124,8 @@ const configuredStories = stories.map((story) => ({
 
   function updateEmptyState() {
     if (!storyListEl || !storyListEmptyEl) return;
-    storyListEmptyEl.style.display = storyListEl.children.length > 0 ? 'none' : '';
+    const visibleStoryCount = storyListEl.querySelectorAll('.story-card:not(.story-card--loader)').length;
+    storyListEmptyEl.style.display = visibleStoryCount > 0 ? 'none' : '';
   }
 
   function showCatalogStatus(message, isError = false) {
@@ -199,6 +197,12 @@ const configuredStories = stories.map((story) => ({
     const actions = document.createElement('div');
     actions.className = 'story-card-actions';
 
+    const readButton = document.createElement('a');
+    readButton.className = 'btn';
+    readButton.href = makeLocalStoryHref(entry.csv);
+    readButton.textContent = 'Read';
+    actions.appendChild(readButton);
+
     const shareButton = document.createElement('button');
     shareButton.type = 'button';
     shareButton.className = 'story-action-btn';
@@ -220,7 +224,7 @@ const configuredStories = stories.map((story) => ({
     deleteButton.className = 'story-action-btn story-action-btn--danger';
     deleteButton.dataset.action = 'delete';
     deleteButton.dataset.csv = entry.csv;
-    deleteButton.textContent = 'Delete';
+    deleteButton.textContent = 'Remove';
     actions.appendChild(deleteButton);
 
     item.appendChild(actions);

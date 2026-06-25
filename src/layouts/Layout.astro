@@ -27,6 +27,7 @@ const pageTitle = title ? `${title} | ${siteTitle}` : siteTitle;
 // subdirectory deploys (e.g. "/my-story/" → "/my-story/styles/global.css").
 const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 const shouldRenderAnalytics = import.meta.env.PROD && analyticsSnippet.trim().length > 0;
+const currentPath = Astro.url.pathname;
 ---
 <!doctype html>
 <html lang="en">
@@ -36,6 +37,20 @@ const shouldRenderAnalytics = import.meta.env.PROD && analyticsSnippet.trim().le
     <meta name="description" content={description} />
     <title>{pageTitle}</title>
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <script is:inline>
+      (() => {
+        const key = 'choose-your-own-csv-theme';
+        try {
+          const stored = window.localStorage.getItem(key);
+          const theme = stored === 'dark' || stored === 'paper' || stored === 'minimal'
+            ? stored
+            : 'paper';
+          document.documentElement.dataset.theme = theme;
+        } catch {
+          document.documentElement.dataset.theme = 'paper';
+        }
+      })();
+    </script>
     <!-- Global styles -->
     <link rel="stylesheet" href={`${base}styles/global.css`} />
     {shouldRenderAnalytics && <Fragment set:html={analyticsSnippet} />}
@@ -43,7 +58,79 @@ const shouldRenderAnalytics = import.meta.env.PROD && analyticsSnippet.trim().le
   <body>
     <!-- ===== Site header ===== -->
     <header class="site-header">
-      <a href={base} class="site-title">{siteTitle}</a>
+      <div class="site-header-inner container">
+        <a href={base} class="site-title">{siteTitle}</a>
+
+        <button
+          type="button"
+          class="site-menu-toggle"
+          data-menu-open
+          aria-haspopup="dialog"
+          aria-controls="site-menu-dialog"
+        >
+          Menu
+        </button>
+      </div>
+
+      <dialog class="site-menu-dialog" id="site-menu-dialog" data-site-menu aria-label="Site menu">
+        <div class="site-menu-panel">
+          <div class="site-menu-header">
+            <div>
+              <p class="site-menu-kicker">Navigate</p>
+              <p class="site-menu-title">Choose a story, make a story, or load one to share.</p>
+            </div>
+
+            <button type="button" class="site-menu-close" data-menu-close>
+              Close
+            </button>
+          </div>
+
+          <nav class="site-nav" aria-label="Primary">
+            <a
+              href={base}
+              class:list={["site-nav-link", currentPath === base && 'is-current']}
+              aria-current={currentPath === base ? 'page' : undefined}
+            >
+              Stories
+            </a>
+            <a
+              href={`${base}about/`}
+              class:list={["site-nav-link", currentPath === `${base}about/` && 'is-current']}
+              aria-current={currentPath === `${base}about/` ? 'page' : undefined}
+            >
+              Learn more
+            </a>
+            <a
+              href={`${base}get-started/`}
+              class:list={["site-nav-link", currentPath === `${base}get-started/` && 'is-current']}
+              aria-current={currentPath === `${base}get-started/` ? 'page' : undefined}
+            >
+              Create your own story
+            </a>
+          </nav>
+
+          <form class="theme-picker" data-theme-picker>
+            <fieldset class="theme-picker-fieldset">
+              <legend class="theme-picker-label">Reading mode</legend>
+
+              <label class="theme-picker-option">
+                <input type="radio" name="theme-mode" value="paper" checked />
+                <span>Paper</span>
+              </label>
+
+              <label class="theme-picker-option">
+                <input type="radio" name="theme-mode" value="minimal" />
+                <span>Minimal</span>
+              </label>
+
+              <label class="theme-picker-option">
+                <input type="radio" name="theme-mode" value="dark" />
+                <span>Dark</span>
+              </label>
+            </fieldset>
+          </form>
+        </div>
+      </dialog>
     </header>
 
     <!-- ===== Main content ===== -->
@@ -55,5 +142,63 @@ const shouldRenderAnalytics = import.meta.env.PROD && analyticsSnippet.trim().le
     <footer class="site-footer">
       <slot name="footer" />
     </footer>
+
+    <script is:inline>
+      (() => {
+        const key = 'choose-your-own-csv-theme';
+        const root = document.documentElement;
+        const picker = document.querySelector('[data-theme-picker]');
+        const menu = document.querySelector('[data-site-menu]');
+        const menuOpenButton = document.querySelector('[data-menu-open]');
+
+        if (menu instanceof HTMLDialogElement && menuOpenButton instanceof HTMLButtonElement) {
+          menuOpenButton.addEventListener('click', () => {
+            menu.showModal();
+          });
+
+          menu.querySelectorAll('[data-menu-close]').forEach((button) => {
+            button.addEventListener('click', () => menu.close());
+          });
+
+          menu.addEventListener('click', (event) => {
+            if (event.target === menu) {
+              menu.close();
+            }
+          });
+
+          menu.querySelectorAll('a').forEach((link) => {
+            link.addEventListener('click', () => menu.close());
+          });
+        }
+
+        if (!picker) return;
+
+        const radios = Array.from(
+          picker.querySelectorAll('input[name="theme-mode"]')
+        );
+        const themes = new Set(['minimal', 'dark', 'paper']);
+
+        const applyTheme = (theme) => {
+          if (!themes.has(theme)) return;
+          root.dataset.theme = theme;
+          try {
+            window.localStorage.setItem(key, theme);
+          } catch {
+            // Ignore storage failures and keep the in-memory theme.
+          }
+        };
+
+        const currentTheme = themes.has(root.dataset.theme)
+          ? root.dataset.theme
+          : 'paper';
+
+        radios.forEach((radio) => {
+          radio.checked = radio.value === currentTheme;
+          radio.addEventListener('change', () => {
+            if (radio.checked) applyTheme(radio.value);
+          });
+        });
+      })();
+    </script>
   </body>
 </html>
