@@ -229,6 +229,20 @@ hr {
   background: rgba(33, 26, 20, 0.24);
 }
 
+body.story-route .site-header {
+  background: transparent;
+  border-bottom: 0;
+  box-shadow: none;
+}
+
+body.story-route .site-header-inner {
+  justify-content: flex-end;
+}
+
+body.story-route .site-title {
+  display: none;
+}
+
 .site-menu-panel {
   background: var(--color-surface);
   border-left: var(--surface-border-width) solid var(--color-border);
@@ -588,6 +602,7 @@ main {
   max-width: var(--max-width);
   margin-inline: auto;
   padding-inline: var(--spacing);
+  margin-bottom: 3rem;
 }
 
 /* loading / error states */
