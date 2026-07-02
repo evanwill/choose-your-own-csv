@@ -241,10 +241,7 @@ hr {
 }
 
 .site-menu-header {
-  align-items: start;
-  display: flex;
-  gap: 1rem;
-  justify-content: space-between;
+  text-align: right;
 }
 
 .site-menu-kicker {
@@ -286,11 +283,6 @@ hr {
   background: var(--color-accent-light);
   border-color: var(--color-border);
   color: var(--color-accent);
-}
-
-.theme-picker {
-  flex-shrink: 0;
-  margin-top: auto;
 }
 
 .theme-picker-fieldset {

@@ -75,14 +75,14 @@ const currentPath = Astro.url.pathname;
       <dialog class="site-menu-dialog" id="site-menu-dialog" data-site-menu aria-label="Site menu">
         <div class="site-menu-panel">
           <div class="site-menu-header">
-            <div>
-              <p class="site-menu-kicker">Navigate</p>
-              <p class="site-menu-title">Choose a story, make a story, or load one to share.</p>
-            </div>
-
             <button type="button" class="site-menu-close" data-menu-close>
               Close
             </button>
+          </div>
+
+          <div>
+            <h2 class="site-menu-kicker">{siteTitle}</h2>
+            <p class="site-menu-title">{siteDescription}</p>
           </div>
 
           <nav class="site-nav" aria-label="Primary">
@@ -109,26 +109,25 @@ const currentPath = Astro.url.pathname;
             </a>
           </nav>
 
-          <form class="theme-picker" data-theme-picker>
-            <fieldset class="theme-picker-fieldset">
-              <legend class="theme-picker-label">Reading mode</legend>
-
-              <label class="theme-picker-option">
-                <input type="radio" name="theme-mode" value="paper" checked />
-                <span>Paper</span>
-              </label>
-
-              <label class="theme-picker-option">
-                <input type="radio" name="theme-mode" value="minimal" />
-                <span>Minimal</span>
-              </label>
-
-              <label class="theme-picker-option">
-                <input type="radio" name="theme-mode" value="dark" />
-                <span>Dark</span>
-              </label>
-            </fieldset>
-          </form>
+          <div>
+            <h2 class="site-menu-kicker">Reading Mode</h2>
+            <form class="theme-picker" data-theme-picker>
+              <fieldset class="theme-picker-fieldset">
+                <label class="theme-picker-option">
+                  <input type="radio" name="theme-mode" value="paper" checked />
+                  <span>Paper</span>
+                </label>
+                <label class="theme-picker-option">
+                  <input type="radio" name="theme-mode" value="minimal" />
+                  <span>Minimal</span>
+                </label>
+                <label class="theme-picker-option">
+                  <input type="radio" name="theme-mode" value="dark" />
+                  <span>Dark</span>
+                </label>
+              </fieldset>
+            </form>
+          </div>
         </div>
       </dialog>
     </header>
