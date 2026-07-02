@@ -290,7 +290,7 @@ hr {
   align-items: flex-start;
   display: flex;
   flex-direction: column;
-  flex-wrap: wrap;
+  width: 100%;
   gap: 0.35rem;
   margin: 0;
   padding: 0;
@@ -304,7 +304,9 @@ hr {
 }
 
 .theme-picker-option {
+  display: block;
   position: relative;
+  width: 100%;
 }
 
 .theme-picker-option input {
@@ -315,23 +317,25 @@ hr {
 }
 
 .theme-picker-option span {
-  background: var(--theme-chip-bg);
-  border: 1px solid var(--theme-chip-border);
-  border-radius: 999px;
-  color: var(--theme-chip-text);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  color: var(--color-text);
   cursor: pointer;
-  display: inline-flex;
-  font-size: 0.76rem;
-  font-weight: 600;
-  line-height: 1;
+  display: flex;
+  font-family: var(--font-serif);
+  font-size: 1.02rem;
+  line-height: 1.35;
   min-height: 2.35rem;
-  min-width: 6.25rem;
-  padding: 0.4rem 0.72rem;
+  padding: 0.6rem 0.7rem;
+  width: 100%;
   transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .theme-picker-option:hover span {
-  background: var(--theme-chip-hover-bg);
+  background: var(--color-accent-light);
+  border-color: var(--color-border);
+  color: var(--color-accent);
 }
 
 .theme-picker-option input:focus-visible + span {
@@ -340,9 +344,9 @@ hr {
 }
 
 .theme-picker-option input:checked + span {
-  background: var(--theme-chip-active-bg);
-  border-color: var(--theme-chip-active-border);
-  color: var(--theme-chip-active-text);
+  background: var(--color-accent-light);
+  border-color: var(--color-border);
+  color: var(--color-accent);
 }
 
 /* ----- Main content area ----- */
@@ -709,7 +713,7 @@ main {
   max-height: 390px;
   max-width: 100%;
   margin: auto;
-  //object-fit: cover;
+  /* object-fit: cover; */
 }
 
 /* cover image — full width, taller, with extra bottom space */
@@ -766,8 +770,7 @@ main {
   }
 
   .theme-picker-option span {
-    min-width: 5rem;
-    justify-content: center;
+    justify-content: flex-start;
   }
 
   .section-heading {
