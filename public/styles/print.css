@@ -1,12 +1,6 @@
-/* =============================================================
-   print.css — stylesheet handed to paged.js for the printable
-   story view. Deliberately minimal: no borders, drop shadows, or
-   card surfaces — just ink-friendly type on a page.
-
-   Every rule here is scoped under classes that only exist inside
-   the paged.js-generated book pages (.print-entry, .print-cover,
-   etc.), so nothing here can leak into the surrounding toolbar UI.
-   ============================================================= */
+/* 
+  print.css — stylesheet for paged.js printable story view. 
+*/
 
 @page {
   size: A5;
@@ -44,6 +38,19 @@
   line-height: 1.25;
   margin-bottom: 0.6em;
   color: #111;
+}
+
+/* Running page number above the entry title */
+.print-entry-title::before {
+  color: #888;
+  content: counter(page) ".";
+  display: block;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 8pt;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5em;
+  text-transform: uppercase;
 }
 
 .print-entry-image img {
