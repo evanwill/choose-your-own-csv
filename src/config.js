@@ -9,7 +9,7 @@ export const siteTitle = "Choose Your Own CSV";
 export const siteDescription = "Interactive nonlinear narrative stories published from a spreadsheet.";
 
 // The footer text for the site.
-export const siteFooter = "Built with choose-your-own-csv.";
+export const siteFooter = "Read, create, and share interactive stories from a spreadsheet!";
 
 
 // ----------------------------------------------------------
