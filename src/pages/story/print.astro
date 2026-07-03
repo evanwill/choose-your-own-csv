@@ -1,0 +1,312 @@
+---
+// story/print.astro — printable / PDF version of a story, built with
+// paged.js (https://pagedjs.org/).
+//
+// This is a standalone HTML page (it does not use the shared site Layout)
+// because paged.js takes over pagination of arbitrary DOM content, and we
+// want full control over exactly what gets laid out into book pages versus
+// what stays as on-screen-only toolbar chrome.
+//
+// Supported URL query parameters (same as /story/):
+//   ?story=<id>   — which configured story to load (matches config.js story id)
+//   ?csv=<url>    — (development mode only) override the CSV URL
+//
+// Every row in the story CSV becomes exactly one page-section. Choices are
+// rendered as in-page anchor links (so they work as clickable links in an
+// exported PDF) with a paged.js target-counter() page-number reference
+// appended, so the printed paper version can also be read by flipping to
+// the numbered page — like a physical choose-your-own-adventure book.
+import { siteTitle, stories, developmentMode } from '../../config.js';
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>Print | {siteTitle}</title>
+    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+
+    <!-- Screen-only toolbar chrome. Kept out of print.css (which is fed to
+         paged.js and only styles the generated book pages) so the two never
+         collide. -->
+    <style is:inline>
+      :root { color-scheme: light; }
+      * { box-sizing: border-box; }
+      body {
+        background: #ececec;
+        color: #1a1a1a;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        margin: 0;
+      }
+      #print-toolbar {
+        align-items: center;
+        background: #fff;
+        border-bottom: 1px solid #d8d5cf;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 1rem;
+        padding: 0.85rem 1.25rem;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+      #print-toolbar a,
+      #print-toolbar button {
+        font: inherit;
+      }
+      #print-back-link {
+        color: #5b4fcf;
+        text-decoration: underline;
+      }
+      #print-btn {
+        appearance: none;
+        background: #5b4fcf;
+        border: none;
+        border-radius: 0.4rem;
+        color: #fff;
+        cursor: pointer;
+        font-weight: 700;
+        padding: 0.5rem 1rem;
+      }
+      #print-btn:disabled {
+        cursor: wait;
+        opacity: 0.6;
+      }
+      #print-status {
+        color: #555;
+        flex: 1 1 auto;
+        font-size: 0.9rem;
+        margin: 0;
+        min-width: 12rem;
+      }
+      #print-status.is-error { color: #c0392b; }
+      #print-render {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1.5rem 1rem 3rem;
+      }
+      @media print {
+        #print-toolbar { display: none; }
+        body { background: #fff; }
+        #print-render { padding: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="print-toolbar">
+      <a id="print-back-link" href={base}>&larr; Back to story</a>
+      <button id="print-btn" type="button" disabled>Print / Save as PDF</button>
+      <p id="print-status">Preparing printable edition&hellip;</p>
+    </div>
+
+    <!-- Inert source content: paged.js reads this template and flows its
+         content into #print-render as paginated book pages. It is never
+         rendered directly (templates don't render), so it can't leak into
+         the toolbar or be shown before layout is ready. -->
+    <template id="print-source"></template>
+
+    <div id="print-render"></div>
+
+    <script id="print-page-data" type="application/json" set:html={JSON.stringify({ base, stories, developmentMode, siteTitle })}></script>
+
+    <!--
+      PapaParse — lightweight CSV parser
+      https://www.papaparse.com/
+    -->
+    <script src={`${base}assets/lib/papaparse.min.js`}></script>
+
+    <!-- Disable paged.js's default auto-run (which would swallow the whole
+         <body>, toolbar included) — we drive it manually once the story
+         content is built. Must run before the polyfill script below. -->
+    <script is:inline>
+      window.PagedConfig = { auto: false };
+    </script>
+
+    <!--
+      Paged.js — CSS Paged Media polyfill, used to lay out the story as
+      printable book pages. https://pagedjs.org/
+    -->
+    <script src={`${base}assets/lib/paged.polyfill.min.js`}></script>
+
+    <script>
+      import { loadStoryRows } from '../../scripts/story-loader.js';
+      import { renderMarkdown, getChoices, parseChoice, resolveCsvUrl } from '../../scripts/story-shared.js';
+
+      const pageDataEl = document.getElementById('print-page-data');
+      const pageData = pageDataEl ? JSON.parse(pageDataEl.textContent || '{}') : {};
+      const SITE_CONFIG = {
+        stories: Array.isArray(pageData.stories) ? pageData.stories : [],
+        developmentMode: Boolean(pageData.developmentMode),
+      };
+      const base = pageData.base || '/';
+      const siteTitle = pageData.siteTitle || 'Choose Your Own CSV';
+
+      function getParam(name) {
+        return new URLSearchParams(window.location.search).get(name) || '';
+      }
+
+      const statusEl = document.getElementById('print-status');
+      const printBtn = document.getElementById('print-btn');
+      const backLink = document.getElementById('print-back-link');
+
+      function setStatus(message, isError = false) {
+        statusEl.textContent = message;
+        statusEl.classList.toggle('is-error', isError);
+      }
+
+      // Build the back-to-story link, preserving whichever param identifies
+      // the story (mirrors the share/print link logic in story.astro).
+      function buildBackUrl() {
+        const storyId = getParam('story');
+        const csvId   = getParam('csv');
+        const params = new URLSearchParams();
+        if (storyId) params.set('story', storyId);
+        else if (csvId) params.set('csv', csvId);
+        const qs = params.toString();
+        return `${base}story/${qs ? `?${qs}` : ''}`;
+      }
+
+      // Map each CSV row's `id` value to a safe, unique DOM id for anchors.
+      // Using the row index (rather than sanitizing the raw id) sidesteps
+      // any need to worry about ids containing characters that aren't safe
+      // in an HTML id / CSS selector / URL fragment.
+      function buildIdMap(rows) {
+        const map = new Map();
+        rows.forEach((row, i) => {
+          const key = String(row.id ?? '').trim();
+          if (!map.has(key)) map.set(key, `print-entry-${i}`);
+        });
+        return map;
+      }
+
+      function buildEntrySection(entry, idMap) {
+        const key = String(entry.id ?? '').trim();
+        const isCover = key === 'info';
+
+        const section = document.createElement('section');
+        section.className = isCover ? 'print-entry print-cover' : 'print-entry';
+        section.id = idMap.get(key);
+
+        const h2 = document.createElement('h2');
+        h2.className = 'print-entry-title';
+        h2.textContent = entry.title || '(no title)';
+        section.appendChild(h2);
+
+        // Optional image — only allow http/https URLs or site-relative
+        // paths, matching the safety check used by the interactive player.
+        const imageLink = (entry.image_link || '').trim();
+        if (imageLink && /^(https?:\/\/|\/|\.\/)/.test(imageLink)) {
+          const figure = document.createElement('figure');
+          figure.className = 'print-entry-image';
+          const img = document.createElement('img');
+          img.src = imageLink;
+          img.alt = (entry.alt_text || '').trim();
+          figure.appendChild(img);
+          section.appendChild(figure);
+        }
+
+        const textDiv = document.createElement('div');
+        textDiv.className = 'print-entry-text';
+        textDiv.innerHTML = renderMarkdown(entry.text || '');
+        section.appendChild(textDiv);
+
+        const choices = getChoices(entry);
+        if (choices.length > 0) {
+          const ul = document.createElement('ul');
+          ul.className = 'print-choices';
+          choices.forEach((raw) => {
+            const { label, targetId } = parseChoice(raw, isCover ? 'Begin Story' : '');
+            const targetKey = String(targetId).trim();
+            const li = document.createElement('li');
+            if (idMap.has(targetKey)) {
+              const a = document.createElement('a');
+              a.className = 'print-choice-link';
+              a.href = `#${idMap.get(targetKey)}`;
+              a.textContent = label || targetId;
+              li.appendChild(a);
+            } else {
+              li.className = 'print-choice-missing';
+              li.textContent = `${label || targetId} (missing entry)`;
+            }
+            ul.appendChild(li);
+          });
+          section.appendChild(ul);
+        } else {
+          const end = document.createElement('p');
+          end.className = 'print-end';
+          end.textContent = '☞ The End.';
+          section.appendChild(end);
+        }
+
+        return section;
+      }
+
+      async function init() {
+        backLink.href = buildBackUrl();
+
+        const csvUrl = resolveCsvUrl({
+          developmentMode: SITE_CONFIG.developmentMode,
+          stories: SITE_CONFIG.stories,
+          storyParam: getParam('story'),
+          csvParam: getParam('csv'),
+          base,
+        });
+
+        if (!csvUrl) {
+          setStatus('No story CSV configured.', true);
+          return;
+        }
+
+        let rows;
+        try {
+          rows = await loadStoryRows(csvUrl);
+        } catch (error) {
+          if (error?.message === 'The CSV is missing required columns.') {
+            setStatus('The CSV is missing required columns (id, title, text, choice_1).', true);
+          } else if (error?.message === 'The CSV is empty or could not be parsed.') {
+            setStatus('The CSV is empty or could not be parsed.', true);
+          } else if (error?.message === 'CSV parser unavailable.') {
+            setStatus('CSV parser unavailable.', true);
+          } else {
+            setStatus(`Error loading CSV: ${(error && error.message) || error}`, true);
+          }
+          return;
+        }
+
+        const coverTitle = (rows[0] && rows[0].title) || 'Story';
+        document.title = `Print: ${coverTitle} | ${siteTitle}`;
+
+        setStatus(`Laying out ${rows.length} pages…`);
+
+        const idMap = buildIdMap(rows);
+        const sourceTemplate = document.getElementById('print-source');
+        rows.forEach((entry) => {
+          sourceTemplate.content.appendChild(buildEntrySection(entry, idMap));
+        });
+
+        try {
+          const previewer = new window.Paged.Previewer();
+          await previewer.preview(
+            sourceTemplate.content,
+            [`${base}styles/print.css`],
+            document.getElementById('print-render')
+          );
+        } catch (error) {
+          setStatus(`Error laying out the printable pages: ${(error && error.message) || error}`, true);
+          return;
+        }
+
+        const pageCount = document.querySelectorAll('#print-render .pagedjs_page').length;
+        setStatus(`Ready — ${pageCount} page${pageCount === 1 ? '' : 's'}. Use the button below or Ctrl/Cmd+P to save as PDF.`);
+        printBtn.disabled = false;
+        printBtn.addEventListener('click', () => window.print());
+      }
+
+      init();
+    </script>
+  </body>
+</html>

@@ -773,6 +773,17 @@ main {
 .story-share-btn:hover { color: var(--color-accent-hover); }
 .story-share-btn--copied { color: var(--color-success); text-decoration: none; }
 
+/* print button (cover page) */
+.story-print-btn {
+  color: var(--color-accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  text-decoration: underline;
+  vertical-align: baseline;
+}
+.story-print-btn:hover { color: var(--color-accent-hover); }
+
 /* ----- Responsive tweaks ----- */
 @media (max-width: 600px) {
   html { font-size: 16px; }

@@ -68,6 +68,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 
 <script>
 import { loadStoryRows, rememberLocalStory } from '../scripts/story-loader.js';
+import { renderMarkdown, getChoices, parseChoice, resolveCsvUrl as resolveCsvUrlShared } from '../scripts/story-shared.js';
 
 // ============================================================
 // choose-your-own-csv — story player script
@@ -80,47 +81,6 @@ const SITE_CONFIG = {
   developmentMode: Boolean(pageData.developmentMode),
 };
 const base = pageData.base || '/';
-
-// ------------------------------------------------------------
-// Minimal Markdown renderer
-// Supports: **bold**, *italic*, `code`, [link](url),
-//           paragraphs (blank lines), line breaks (\n).
-// ------------------------------------------------------------
-function renderMarkdown(text) {
-  if (!text) return '';
-
-  // Split into paragraphs on blank lines
-  const paragraphs = text.split(/\n{2,}/);
-
-  return paragraphs.map(para => {
-    // Inline rules (order matters)
-    let html = para
-      // Escape HTML entities first to prevent XSS
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      // Bold: **text** or __text__
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/__(.+?)__/g, '<strong>$1</strong>')
-      // Italic: *text* or _text_
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      .replace(/_(.+?)_/g, '<em>$1</em>')
-      // Inline code: `code`
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      // Links: [label](url) — only allow http/https/relative URLs
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, url) => {
-        // Block javascript: and data: URLs to prevent XSS
-        const safe = /^(https?:\/\/|\/|\.\/)/.test(url.trim());
-        return safe
-          ? `<a href="${url.trim()}" target="_blank" rel="noopener">${label}</a>`
-          : `<span>${label}</span>`;
-      })
-      // Line breaks within a paragraph
-      .replace(/\n/g, '<br>');
-
-    return `<p>${html}</p>`;
-  }).join('\n');
-}
 
 // ------------------------------------------------------------
 // DOM helpers
@@ -163,33 +123,13 @@ function entryUrl(entryId) {
 // prepended so assets under public/ work in subdirectory deployments.
 // ------------------------------------------------------------
 function resolveCsvUrl() {
-  const devMode = SITE_CONFIG.developmentMode;
-  const storyParam = getParam('story');
-  const csvParam   = getParam('csv');
-
-  // Dev-mode override — used as-is (absolute URL or user-supplied path)
-  if (devMode && csvParam) return csvParam;
-
-  // Find configured story by id
-  const stories = SITE_CONFIG.stories || [];
-  let csvPath = null;
-  if (storyParam) {
-    const match = stories.find(s => s.id === storyParam);
-    if (match) csvPath = match.csv;
-  }
-
-  // Fallback: first story
-  if (!csvPath && stories.length > 0) csvPath = stories[0].csv;
-
-  if (!csvPath) return null;
-
-  // Prepend the base URL for site-relative paths (e.g. "/assets/story.csv")
-  // so they resolve correctly when the site is hosted in a subdirectory.
-  if (csvPath.startsWith('/') && base !== '/') {
-    // base already ends with '/', csvPath starts with '/' — strip one slash
-    return base.replace(/\/$/, '') + csvPath;
-  }
-  return csvPath;
+  return resolveCsvUrlShared({
+    developmentMode: SITE_CONFIG.developmentMode,
+    stories: SITE_CONFIG.stories,
+    storyParam: getParam('story'),
+    csvParam: getParam('csv'),
+    base,
+  });
 }
 
 // ------------------------------------------------------------
@@ -255,20 +195,7 @@ function renderEntry(rows, entryId) {
   textEl.innerHTML = renderMarkdown(entry.text || '');
 
   // ---- Choices ----
-  // Gather all choice_1, choice_2, … columns in order
-  const choiceKeys = Object.keys(entry)
-    .filter(k => /^choice_\d+$/.test(k))
-    .sort((a, b) => {
-      // Sort numerically: choice_1 < choice_2 < …
-      const numA = parseInt(a.split('_')[1], 10);
-      const numB = parseInt(b.split('_')[1], 10);
-      return numA - numB;
-    });
-
-  // Filter out empty choice values
-  const choices = choiceKeys
-    .map(k => (entry[k] || '').trim())
-    .filter(v => v !== '');
+  const choices = getChoices(entry);
 
   choicesListEl.innerHTML = '';
 
@@ -276,15 +203,7 @@ function renderEntry(rows, entryId) {
     // Cover page: render choice_1 as a prominent "Begin" button
     const choice1 = (entry.choice_1 || '').trim();
     if (choice1) {
-      const pipeIndex = choice1.lastIndexOf('|');
-      let label, targetEntryId;
-      if (pipeIndex !== -1) {
-        label         = choice1.slice(0, pipeIndex).trim() || 'Begin Story';
-        targetEntryId = choice1.slice(pipeIndex + 1).trim();
-      } else {
-        label         = 'Begin Story';
-        targetEntryId = choice1;
-      }
+      const { label, targetId: targetEntryId } = parseChoice(choice1, 'Begin Story');
       const a = document.createElement('a');
       a.className   = 'story-begin-btn';
       a.href        = entryUrl(targetEntryId);
@@ -297,18 +216,7 @@ function renderEntry(rows, entryId) {
     hide(storyEndEl);
   } else if (choices.length > 0) {
     choices.forEach(choice => {
-      // Each choice follows the format: "Link text|target-id"
-      const pipeIndex = choice.lastIndexOf('|');
-
-      let label, targetEntryId;
-      if (pipeIndex !== -1) {
-        label         = choice.slice(0, pipeIndex).trim();
-        targetEntryId = choice.slice(pipeIndex + 1).trim();
-      } else {
-        // No pipe found — treat the whole value as both label and id
-        label         = choice;
-        targetEntryId = choice;
-      }
+      const { label, targetId: targetEntryId } = parseChoice(choice);
 
       const li = document.createElement('li');
       const a  = document.createElement('a');
@@ -345,6 +253,12 @@ function renderEntry(rows, entryId) {
 
   // Share button — cover page only
   if (isCover) {
+    // Preserve only the param that identifies the story (?story= for
+    // configured stories, ?csv= for dev-mode CSV links) for both the
+    // share and print links, stripping any ?id= navigation state.
+    const storyId = getParam('story');
+    const csvId   = getParam('csv');
+
     storyNavEl.appendChild(document.createTextNode(' · '));
     const shareBtn = document.createElement('button');
     shareBtn.className = 'story-share-btn';
@@ -353,11 +267,6 @@ function renderEntry(rows, entryId) {
       '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>' +
       ' <span class="share-label">Share</span>';
     shareBtn.addEventListener('click', () => {
-      // Build a clean cover-page URL, preserving only the param that
-      // identifies the story (?story= for config stories, ?csv= for dev-mode
-      // CSV links) and stripping any ?id= navigation state.
-      const storyId = getParam('story');
-      const csvId   = getParam('csv');
       let shareUrl;
       if (storyId) {
         shareUrl = `${window.location.origin}${window.location.pathname}?story=${encodeURIComponent(storyId)}`;
@@ -390,6 +299,21 @@ function renderEntry(rows, entryId) {
       }
     });
     storyNavEl.appendChild(shareBtn);
+
+    // Print button — links to the paged.js print view, preserving the
+    // same story-identifying param as the share link.
+    storyNavEl.appendChild(document.createTextNode(' · '));
+    const printParams = new URLSearchParams();
+    if (storyId) printParams.set('story', storyId);
+    else if (csvId) printParams.set('csv', csvId);
+    const printQs = printParams.toString();
+    const printLink = document.createElement('a');
+    printLink.className = 'story-print-btn';
+    printLink.href = `${base}story/print/${printQs ? `?${printQs}` : ''}`;
+    printLink.innerHTML =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>' +
+      ' <span>Print</span>';
+    storyNavEl.appendChild(printLink);
   }
 
   // ---- Show the card ----
