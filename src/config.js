@@ -1,15 +1,11 @@
 // ============================================================
 // choose-your-own-csv site configuration
 // ============================================================
-// Edit the values below to customize your site.
-// After editing, rebuild the site with `npm run build`
-// or restart the dev server with `npm run dev`.
-// ============================================================
 
-// Site-wide title displayed in the browser tab and header.
+// Site-wide title displayed in the browser tab and header
 export const siteTitle = "Choose Your Own CSV";
 
-// A short description of the site used in the <meta> description tag.
+// A short description of the site used on the home page, nav menu, and <meta> description tag
 export const siteDescription = "Interactive nonlinear narrative stories published from a spreadsheet.";
 
 // The footer text for the site.
