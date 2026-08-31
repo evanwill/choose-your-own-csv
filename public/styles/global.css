@@ -804,7 +804,7 @@ main {
     display: grid;
   }
 
-  main, .site-footer { padding-inline: 1rem; }
+  //main, .site-footer { padding-inline: 1rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
